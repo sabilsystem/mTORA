@@ -1,0 +1,596 @@
+Listed directory public
+Listed directory mtora-frontend
+
+# mTORA Frontend Migration Blueprint: Forensic UI & Technical Analysis
+
+This document provides a forensic analysis of the existing mTORA website source files (`index.html`, `protein-report.html`, and `order.html`) to guide the migration into Next.js 16 (App Router) and React 19.
+
+---
+
+## 1. Route Map
+
+The reference codebase defines three primary routes with distinct functional scopes:
+
+| Route | Purpose | Reference Source | Major Sections | Key Interactions | Assets Referenced |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `/` | Brand story, value proposition, nutrition credentials, customer proof, conversion triggers | `index.html` | 1. Promo Bar<br>2. Sticky Navigation<br>3. Hero Section<br>4. About Section<br>5. Benefits Grid<br>6. Meal Fit Horizontal Row<br>7. Reels Carousel & Lightbox<br>8. Final Conversion CTA<br>9. Site Footer | • Continuous marquee scroll<br>• Scroll-dismiss promo bar<br>• Sticky nav backdrop blur on scroll<br>• Mobile drawer toggle & scroll locking<br>• Intersection scroll reveal<br>• Video card intersection autoplay<br>• Carousel horizontal drag/scroll + dot sync<br>• Full-screen reel lightbox modal | • `assets/hero/roti.png`<br>• `assets/about/about.mp4`<br>• `assets/meals/{dal,paneer,sabzi,curd,eggs,chicken}.png`<br>• `assets/reels/reel-{1..6}.mp4`<br>• `assets/reels/reel-{1..6}-poster.jpg` |
+| `/protein-report` | Regulatory transparency, lab verification inspection, document download | `protein-report.html` | 1. Sticky Navigation<br>2. Report Hero<br>3. PDF Viewer Panel with Fallback<br>4. Report Action Buttons<br>5. Trust Badges Grid<br>6. Site Footer | • Sticky nav scroll transitions<br>• Mobile navigation drawer<br>• Asynchronous PDF document availability check (`HEAD` probe)<br>• Fallback state trigger if PDF fails<br>• External tab viewing and direct file download | • `assets/protein-report.pdf` |
+| `/order` | Customer acquisition, package selection, delivery slot configuration, checkout & WhatsApp confirmation | `order.html` | 1. Sticky Navigation<br>2. Order Hero<br>3. Multi-field Order Form<br>4. Live Price & Delivery Calculator<br>5. Order Confirmation View<br>6. Next Steps & Assistance Sidebar<br>7. Site Footer | • Sticky nav scroll transitions<br>• Mobile navigation drawer<br>• Digits-only phone input sanitation<br>• "Same as mobile" sync & readonly toggling<br>• Quantity stepper (`+`/`−`) clamped [1, 20]<br>• Dependent cascading selects (Zone → Locality; Day → Slot)<br>• Dynamic price calculation with live summary breakdown<br>• Client validation with smooth scroll to first error<br>• Asynchronous order placement dispatch<br>• WhatsApp deep link URI generation with prefilled order summary | • None (SVG icons embedded inline) |
+
+*Note: All routes link to an external Instagram profile: `https://www.instagram.com/mtora.in?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==`.*
+
+---
+
+## 2. Component Decomposition
+
+Decomposition is structured around concrete UI responsibilities and state boundaries. Generic layout abstractions (such as generic `Card`, `Container`, or `Wrapper`) are avoided in favor of semantic, purposeful components.
+
+```
+src/
+├── components/
+│   ├── layout/
+│   │   ├── PromoBar.tsx             (Client: Marquee display, scroll-dismiss, layout offset)
+│   │   ├── Navbar.tsx               (Client: Scroll detection, mobile menu drawer state)
+│   │   ├── MobileMenu.tsx           (Client: Fullscreen overlay drawer, body scroll locking)
+│   │   ├── GrainOverlay.tsx         (Server: Fixed SVG grain noise filter)
+│   │   └── Footer.tsx               (Server: Static footer brand & navigation links)
+│   ├── home/
+│   │   ├── HeroSection.tsx          (Client: Visual plate image fallback & scroll cue)
+│   │   ├── AboutSection.tsx         (Server/Client: Autoplay video showcase with grain overlay)
+│   │   ├── BenefitsSection.tsx      (Server: 5-card grid with featured first item)
+│   │   ├── MealFitSection.tsx       (Server: Horizontal scroll row with gradient meal chips)
+│   │   ├── ReelsSection.tsx         (Client: Carousel container, prev/next, dot indicators)
+│   │   ├── ReelCard.tsx             (Client: Intersection autoplay, mute toggle, click-to-open)
+│   │   ├── ReelModal.tsx            (Client: Lightbox modal, video controls, keyboard navigation)
+│   │   └── FinalCtaSection.tsx      (Server: Closing banner with dual action buttons)
+│   ├── protein-report/
+│   │   ├── ReportHero.tsx           (Server: Page header with lab-verified badge)
+│   │   ├── ReportViewer.tsx         (Client: PDF embed with fallback detection)
+│   │   └── ReportTrustGrid.tsx      (Server: 3-column accreditation cards)
+│   └── order/
+│       ├── OrderHero.tsx            (Server: Header context for direct orders)
+│       ├── OrderForm.tsx            (Client: Multi-field form, cascading selects, calculations)
+│       ├── QuantityStepper.tsx      (Client: Controlled increment/decrement counter)
+│       ├── OrderSummary.tsx         (Server/Client: Real-time price breakdown table)
+│       ├── OrderConfirmation.tsx    (Client: Success panel, order ID badge, WhatsApp action)
+│       └── OrderSidebar.tsx         (Server: "What happens next" steps & help card)
+```
+
+### Shared vs. Page-Specific Boundary
+* **Shared (Layout Level):** `Navbar`, `MobileMenu`, `PromoBar` (conditional on Home), `GrainOverlay`, `Footer`.
+* **Page-Specific:**
+  * Home: `HeroSection`, `AboutSection`, `BenefitsSection`, `MealFitSection`, `ReelsSection` (`ReelCard`, `ReelModal`), `FinalCtaSection`.
+  * Protein Report: `ReportHero`, `ReportViewer`, `ReportTrustGrid`.
+  * Order: `OrderHero`, `OrderForm`, `QuantityStepper`, `OrderSummary`, `OrderConfirmation`, `OrderSidebar`.
+
+---
+
+## 3. Interaction Inventory
+
+| Interaction | Trigger | Observable Change | State Requirement | Browser APIs | Component Classification |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Promo Bar Marquee & Dismiss** | • CSS keyframe animation<br>• Window scroll > 30px<br>• Hover | • Infinite left translation `-50%`<br>• Bar translates out/hides<br>• Pauses on mouse hover | React state: `isDismissed`<br>CSS custom property: `--promo-offset` | `window.addEventListener('scroll')`<br>`window.addEventListener('resize')` | **Client Component** (`PromoBar.tsx`) |
+| **Sticky Navbar Elevation** | Window scroll > 40px | Background shifts to `rgba(255,255,255,0.96)`, blur applied (`14px`), padding drops `18px → 12px` | React state: `isScrolled` | `window.addEventListener('scroll')` (passive) | **Client Component** (`Navbar.tsx`) |
+| **Mobile Drawer Navigation** | Click on hamburger button / menu link | Burger transitions to "X"; menu translates from `-100% → 0`; page scrolling locked | React state: `isOpen` | `document.body.style.overflow = 'hidden'` | **Client Component** (`Navbar.tsx` / `MobileMenu.tsx`) |
+| **Scroll Reveal Animations** | Element enters viewport (threshold 0.15, bottom margin -40px) | Elements gain `.is-visible`, translating `28px → 0` and opacity `0 → 1` | React state or lightweight CSS observer hook | `IntersectionObserver` | **Client Component** or lightweight directive |
+| **Hero Photo Fallback** | `<img>` error loading `assets/hero/roti.png` | `roti.png` element is removed; underlying SVG roti plate remains visible | React state: `imgFailed` | `onError` event | **Client Component** (`HeroSection.tsx`) |
+| **Reels Carousel Navigation** | • Drag / touch scroll<br>• Prev / Next button click<br>• Pagination dot click | Smooth scroll by calculated card width + gap; active dot highlights; arrows disable at bounds | React state: `activeIndex`, `canScrollPrev`, `canScrollNext` | `Element.scrollTo()`, `Element.scrollLeft`, `getBoundingClientRect()` | **Client Component** (`ReelsSection.tsx`) |
+| **Reel In-Card Autoplay & Mute** | Reel enters viewport (threshold 0.6) / Mute button click | Video plays when in viewport, pauses when scrolled out. Mute button toggles local sound | React state: `isMuted` | `IntersectionObserver`, `HTMLMediaElement.play()`, `.pause()` | **Client Component** (`ReelCard.tsx`) |
+| **Reel Lightbox (Modal)** | Click / Enter on reel card | Lightbox opens, body scroll locks, video plays full screen with navigation controls | React state: `modalIndex`, `isOpen`, `isPlaying`, `isMuted` | `document.addEventListener('keydown')` (Esc, Left, Right), `body.style.overflow` | **Client Component** (`ReelModal.tsx`) |
+| **Phone Input Sanitization** | User input on Mobile / WhatsApp fields | Strips non-digits (`/\D/g`), truncates to 10 characters | Managed input state | `input` event | **Client Component** (`OrderForm.tsx`) |
+| **"Same as Mobile" Toggle** | Checkbox check/uncheck | WhatsApp field mirrors Mobile and becomes `readOnly`; subsequent edits to Mobile sync | React state: `sameAsMobile` | Synthetic change event | **Client Component** (`OrderForm.tsx`) |
+| **Quantity Stepper** | Click `+` or `−` buttons | Integer increments/decrements clamped between 1 and 20; updates price calculations | React state: `quantity` | Synthetic click event | **Client Component** (`QuantityStepper.tsx`) |
+| **Cascading Select: Zone → Area** | User selects Delivery Zone | Area dropdown enables and populates with locations for that zone; recalculates delivery fee | React state: `selectedZone`, `selectedArea` | Synthetic change event | **Client Component** (`OrderForm.tsx`) |
+| **Cascading Select: Day → Slot** | User selects Delivery Day | Slot dropdown enables; "Today" shows evening only (`7-9 PM`), "Tomorrow" shows both (`7-9 AM`, `7-9 PM`) | React state: `selectedDay`, `selectedSlot` | Synthetic change event | **Client Component** (`OrderForm.tsx`) |
+| **Live Price Calculator** | Any change to Pack, Qty, Zone, or Payment Mode | Dynamic formula updates subtotal, delivery fee, COD fee (₹15), and grand total in real-time | Derived state from form values | Pure computation | **Client Component** (`OrderForm.tsx`) |
+| **Form Validation & Scroll-to-Error** | Click "Place Order" submit | Fields check regex & empty values; `.has-error` class toggled; scrolls first invalid element into view | React state: `errors` | `Element.scrollIntoView({ behavior: 'smooth', block: 'center' })` | **Client Component** (`OrderForm.tsx`) |
+| **Order Placement & Confirmation** | Form submit valid | Button disables with loading text; on success, form hides and confirmation view reveals | React state: `isSubmitting`, `orderResult` | Fetch API (`POST`) | **Client Component** (`OrderForm.tsx`) |
+| **WhatsApp Prefilled Dispatch** | Click "Notify & Pay on WhatsApp" | Opens WhatsApp with pre-formatted encoded summary of Order ID, items, delivery, total | Stateless anchor | `window.open` / anchor link to `wa.me` | **Client Component** (`OrderConfirmation.tsx`) |
+| **PDF Viewer Availability Probe** | Page mount on `/protein-report` | Probes PDF URL (`HEAD`). If non-200 or rejected, hides `<object>` and displays `#reportFallback` | React state: `pdfStatus` (`'loading' \| 'ready' \| 'fallback'`) | Fetch API (`HEAD` request) | **Client Component** (`ReportViewer.tsx`) |
+
+---
+
+## 4. Asset Inventory
+
+### Inventory Table
+| Current Path in Source | Type | Intended Destination | Page & Section | Required? | Viewport Specific? | Role / Purpose |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `assets/hero/roti.png` | Raster Image | `public/assets/hero/roti.png` | Home / Hero | Yes (fallback SVG exists) | Universal | Hero visual of protein roti |
+| `assets/about/about.mp4` | Video (MP4) | `public/assets/about/about.mp4` | Home / About | Yes | Universal | Kitchen demonstration loop |
+| `assets/meals/dal.png` | Raster Image | `public/assets/meals/dal.png` | Home / Meal Fit | Optional (fallback swatch) | Universal | Meal chip pairing illustration |
+| `assets/meals/paneer.png` | Raster Image | `public/assets/meals/paneer.png` | Home / Meal Fit | Optional (fallback swatch) | Universal | Meal chip pairing illustration |
+| `assets/meals/sabzi.png` | Raster Image | `public/assets/meals/sabzi.png` | Home / Meal Fit | Optional (fallback swatch) | Universal | Meal chip pairing illustration |
+| `assets/meals/curd.png` | Raster Image | `public/assets/meals/curd.png` | Home / Meal Fit | Optional (fallback swatch) | Universal | Meal chip pairing illustration |
+| `assets/meals/eggs.png` | Raster Image | `public/assets/meals/eggs.png` | Home / Meal Fit | Optional (fallback swatch) | Universal | Meal chip pairing illustration |
+| `assets/meals/chicken.png` | Raster Image | `public/assets/meals/chicken.png` | Home / Meal Fit | Optional (fallback swatch) | Universal | Meal chip pairing illustration |
+| `assets/reels/reel-1.mp4` to `reel-6.mp4` | Video (MP4) | `public/assets/reels/reel-[1..6].mp4` | Home / Reels | Yes | Universal (9:16 aspect) | Customer social proof reels |
+| `assets/reels/reel-1-poster.jpg` to `reel-6-poster.jpg` | Raster Image | `public/assets/reels/reel-[1..6]-poster.jpg` | Home / Reels | Yes | Universal (9:16 aspect) | Video preview posters |
+| `assets/protein-report.pdf` | Document (PDF)| `public/assets/protein-report.pdf` | Protein Report | Yes | Universal | Lab test certificate for embed & download |
+
+### Target Directory Organization
+```
+public/assets/
+├── hero/
+│   └── roti.png
+├── about/
+│   └── about.mp4
+├── meals/
+│   ├── dal.png
+│   ├── paneer.png
+│   ├── sabzi.png
+│   ├── curd.png
+│   ├── eggs.png
+│   └── chicken.png
+├── reels/
+│   ├── reel-1.mp4 ... reel-6.mp4
+│   └── reel-1-poster.jpg ... reel-6-poster.jpg
+└── protein-report.pdf
+```
+*Note: All inline SVGs (benefit icons, trust marks, UI arrows, checkmarks, WhatsApp glyph, and grain turbulence filter) will be moved into structured React SVG subcomponents or clean TSX markup rather than standalone asset files.*
+
+---
+
+## 5. Design System Extraction
+
+### Color Palette Tokens
+```css
+:root {
+  /* Primary & Accent Palettes */
+  --navy: #363A2D;            /* Deep olive-navy background & brand tone */
+  --navy-2: #454A38;          /* Gradient midtone */
+  --navy-3: #5B6249;          /* Gradient highlight */
+  --cream: #F4E8DA;           /* Base light page background & inverted text */
+  --cream-2: #EADFC8;         /* Section background (Benefits, Meal chips, Summary) */
+  --paper: #FAF3E7;           /* Card & panel surfaces */
+  --charcoal: #221E1A;        /* Primary typography & high contrast elements */
+  --charcoal-soft: #4A443C;   /* Secondary/body copy */
+  --wheat: #C79A4B;           /* Primary CTA & key highlight brand accent */
+  --wheat-light: #E4C588;     /* Button hover state, hero number subtext */
+  --wheat-dim: #8a6f3c;       /* Eyebrows, subtle borders, card numbers */
+
+  /* UI Borders & Dividers */
+  --line: rgba(34, 30, 26, 0.12);
+  --line-dark: rgba(244, 232, 218, 0.14);
+
+  /* Functional / Status */
+  --error-bg: #FBEAE6;
+  --error-border: #E3B4A6;
+  --error-text: #8A3420;
+  --error-field: #B0402C;
+  --success-green: #4E7A45;
+  --whatsapp-green: #3F7A3A;
+  --whatsapp-hover: #4a8f44;
+}
+```
+
+### Typography Tokens
+* **Display Font Family:** `"Space Grotesk", "Arial Narrow", sans-serif;`
+  * Headings (`h1`, `h2`, `h3`, `h4`): `font-weight: 700; line-height: 1.02; letter-spacing: -0.01em;`
+  * Hero Brand Name: `font-weight: 700; font-size: 22px; letter-spacing: 0.02em;`
+  * Hero Headline: `font-weight: 500; font-size: clamp(21px, 2.2vw, 27px); line-height: 1.3;`
+  * Hero Main Stat: `font-weight: 800 (index) / 700 (report/order); font-size: clamp(76px, 10vw, 144px); line-height: 0.9; letter-spacing: -0.03em;`
+* **Body Font Family:** `"Inter", -apple-system, BlinkMacSystemFont, sans-serif;`
+  * Body Text: `font-weight: 400; font-size: 16.5px; line-height: 1.6;`
+  * Lede Paragraphs: `font-size: clamp(17px, 1.6vw, 20px); line-height: 1.55; color: var(--charcoal-soft);`
+  * Buttons: `font-weight: 600; font-size: 14.5px; letter-spacing: 0.02em;`
+* **Data / Utility Monospace:** `"Space Mono", "Courier New", monospace;`
+  * Eyebrow: `font-size: 12.5px; letter-spacing: 0.16em; text-transform: uppercase;`
+  * Promo Bar: `font-size: 12.5px; letter-spacing: 0.04em;`
+  * Navigation Links: `font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase;`
+  * Hero Sub-labels: `font-size: 15px; letter-spacing: 0.3em; text-transform: uppercase;`
+  * Order Summary / Numeric Values: `font-size: 15px; font-weight: 700;`
+
+### Layout, Spacing & Container Tokens
+* **Container Max Width:** `1240px` (`--container`)
+* **Horizontal Page Gutter:** `clamp(20px, 6vw, 28px)`
+* **Section Padding:**
+  * Standard Section: `120px 0` (Desktop) → `80px 0` (Mobile)
+  * Tight Section: `90px 0` (Desktop) → `64px 0` (Mobile)
+  * Inner Hero Padding: `176px 0 90px` (Order / Report) and `96px` top (Home)
+
+### Shape, Elevation & Animation
+* **Border Radii:**
+  * Large (`--radius-lg`): `32px` (Panels, viewer wrappers, about visual)
+  * Medium (`--radius-md`): `20px` (Cards, meal chips, sidebar items)
+  * Small (`--radius-sm`): `12px` (Inputs, error banners, small chips)
+  * Pills: `100px` (Buttons, navigation links, status tags)
+* **Shadows:**
+  * Card Hover: `0 22px 44px -24px rgba(54, 58, 45, 0.35)`
+  * Panels / Viewers: `0 40px 80px -50px rgba(54, 58, 45, 0.4)`
+  * Reels: `0 30px 60px -30px rgba(0, 0, 0, 0.6)`
+  * Roti Photo: `0 30px 60px -20px rgba(0, 0, 0, 0.5)`
+* **Timing & Transitions:**
+  * Core Easing: `cubic-bezier(.22, .61, .36, 1)` (`--ease`)
+  * Buttons: `transform .35s var(--ease), background .3s ease, color .3s ease, border-color .3s ease`
+  * Reveals: `opacity .9s var(--ease), transform .9s var(--ease)`
+
+### Signature Visual Motifs
+1. **The "Puff Ring":** Concentric circular borders (`rgba(228, 197, 136, 0.14 - 0.28)`) simulating roti expanding under heat on a tawa. Used in the Hero and Trust badges.
+2. **Tactile SVG Grain:** Fullscreen fixed SVG with `<feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>` at `opacity: 0.05` and `mix-blend-mode: overlay`.
+
+---
+
+## 6. Responsive Behavior
+
+### Viewport Breakpoints
+* **Mobile Small:** `< 560px`
+* **Mobile Standard:** `< 640px`
+* **Tablet Portrait / Mobile Wide:** `< 820px` / `< 880px`
+* **Tablet Landscape:** `< 900px` / `< 940px`
+* **Desktop Baseline:** `≥ 941px` (Container max `1240px`)
+
+### Responsive Adaptations by Component
+
+#### Navigation & Header
+* **Desktop (≥ 881px):** Inline horizontal links (`.nav-links`), desktop "Order Now" CTA button visible, burger hidden.
+* **Mobile (≤ 880px):** Inline links and right CTA button are hidden (`display: none`). Burger button appears. Mobile fullscreen drawer slides down from top (`transform: translateY(-100%)` to `translateY(0)`).
+
+#### Hero Section
+* **Desktop (≥ 881px):** Two-column grid (`1.05fr 0.95fr`). Roti plate with concentric rings aligns right.
+* **Mobile (≤ 880px):** Single-column layout. Hero visual switches order to `-1` (displays *above* the headline), constrained to `max-width: 320px; aspect-ratio: 1/1; margin: 0 auto 8px;`. Typography centers, CTAs center.
+
+#### About Section
+* **Desktop (≥ 881px):** Two-column grid (`0.9fr 1.1fr`), 64px gap. Visual aspect ratio `16/9`.
+* **Mobile (≤ 880px):** Single-column stacked grid, 36px gap. Video visual moves to top (`order: -1`), aspect ratio switches to `16/10`.
+
+#### Benefits Grid
+* **Desktop (≥ 941px):** 3-column grid (`repeat(3, 1fr)`). Feature card spans 2 columns (`grid-column: span 2`).
+* **Tablet (641px - 940px):** 2-column grid (`1fr 1fr`). Feature card spans both columns.
+* **Mobile (≤ 640px):** 1-column grid (`1fr`). Feature card spans 1 column.
+
+#### Meal Fit Row
+* **All viewports:** Horizontal flex row with `overflow-x: auto` and `scroll-snap-type: x proximity`. On touch devices, native momentum scrolling (`-webkit-overflow-scrolling: touch`) allows swipe navigation through chips.
+
+#### Reels Section
+* **Desktop (≥ 641px):** Cards are fixed at `240px` width, `aspect-ratio: 9/16`.
+* **Mobile (≤ 640px):** Card width scales up to `74vw` to create a prominent mobile swiping carousel. Modal navigation buttons reposition from outside the card (`-60px`) to inside the viewport edges (`-6px`).
+
+#### Order Page Grid
+* **Desktop (≥ 901px):** Two-column layout (`1fr 320px`). Form occupies main area, steps/help card forms right sidebar.
+* **Tablet/Mobile (≤ 900px):** Single-column stacked layout (`grid-template-columns: 1fr`). Form stacked above sidebar. Form row fields stack to single column on `≤ 560px`.
+
+#### Protein Report Viewer
+* **Desktop (≥ 821px):** 3-column trust grid (`repeat(3, 1fr)`). Iframe/Object viewer height `80vh`.
+* **Mobile (≤ 820px):** 1-column trust grid. Viewer height reduces to `65vh`.
+
+---
+
+## 7. Content Inventory
+
+### Common Navigation & Footer
+* **Logo:** `mTORA`
+* **Nav Links:** `Home` (`/`), `Protein Report` (`/protein-report`), `Order Now` (`/order`)
+* **Nav CTA:** `Order Now`
+* **Mobile Menu Additional Links:** `Instagram` (`https://www.instagram.com/mtora.in...`), `View Protein Report`
+* **Footer Top:** Logo `mTORA`, Links: `Home`, `Protein Report`, `Instagram`, `Contact`
+* **Footer Bottom:** `© mTORA. All rights reserved.`
+
+### Home Page (`/`)
+* **Promo Bar:** `🎉 Launch Offer — Get 10% OFF your first order!` (repeated 4× in marquee)
+* **Hero Section:**
+  * Eyebrow: `Everyday Indian Roti · Reinvented`
+  * Main Stat: `15g` (superscript `PROTEIN`)
+  * Sub-label: `Per Roti`
+  * Headline: `Your everyday roti, now packed with protein.`
+  * Body Copy: `A convenient, high-protein roti made for everyday Indian meals — no shakes, no substitutions, no fuss.`
+  * CTAs: `Order Now`, `View Protein Report`
+  * Scan Badge: `LAB VERIFIED` / `15.0g PROTEIN / ROTI` / `NO PRESERVATIVES`
+  * Scroll Indicator: `Scroll`
+* **About Section:**
+  * Eyebrow: `About mTORA`
+  * Visual Tag: `mTORA Kitchen · Everyday Roti`
+  * Heading: `More nutrition. Same everyday roti.`
+  * Lede: `We believe protein shouldn't require a separate shake, a complicated recipe, or a major change to your everyday meals.`
+  * Body Copy: `mTORA was created to make protein a natural part of the food you already love starting with the humble Indian roti. We combine familiar everyday food with modern nutrition to create convenient, protein-rich food for everyday life.`
+* **Benefits Section:**
+  * Eyebrow: `Why mTORA`
+  * Heading: `More than just a roti.`
+  * Lede: `Every mTORA Protein Roti is designed to bring more nutrition to your everyday meal.`
+  * Card 01: `15g protein` — `15g of protein in every roti.`
+  * Card 02: `Good source of fiber` — `Made to bring more fiber into your everyday meal.`
+  * Card 03: `No preservatives` — `Made without added preservatives.`
+  * Card 04: `Essential amino acids` — `Designed with protein sources that provide essential amino acids.`
+  * Card 05: `Everyday nutrition` — `An easy way to make protein part of your regular Indian meals.`
+* **Meal Fit Section:**
+  * Eyebrow: `How it fits`
+  * Heading: `Same meals. More protein.`
+  * Lede: `Pair it with the meals you already love — mTORA isn't a replacement for real food, it's an easy protein upgrade to it.`
+  * Meal Chips: `Dal`, `Paneer`, `Sabzi`, `Curd`, `Eggs`, `Chicken`
+* **Reels Section:**
+  * Eyebrow: `Social proof`
+  * Heading: `Real people. Real reactions.`
+  * Lede: `See what people are saying about mTORA.`
+  * Metadata per card: `@customer_handle`, `Customer reel`
+* **Final CTA Section:**
+  * Eyebrow: `mTORA`
+  * Heading: `Make protein part of your everyday meal.`
+  * Lede: `Your everyday roti. Upgraded with protein.`
+  * CTAs: `View Protein Report`, `Follow us on Instagram`
+
+### Protein Report Page (`/protein-report`)
+* **Header:**
+  * Eyebrow: `Lab Verified`
+  * Heading: `Our Protein Report`
+  * Lede: `Transparency matters. View the protein analysis report for mTORA Protein Roti below.`
+* **Viewer Panel:**
+  * Header Tag: `mTORA-Protein-Report.pdf`
+  * Right Tag: `Updated automatically`
+  * Fallback Heading: `Report coming soon`
+  * Fallback Body: `The lab report hasn't been added yet. Once the report is uploaded, it will display here automatically.`
+* **Actions:** `View Full Report`, `Download Report`
+* **Trust Cards:**
+  * Card 1: `Independently tested` — `Every batch specification is verified against an accredited laboratory analysis.`
+  * Card 2: `No inflated claims` — `Every figure on this site matches the verified values published in the report.`
+  * Card 3: `Always up to date` — `This report is refreshed whenever a new batch analysis becomes available.`
+
+### Order Page (`/order`)
+* **Header:**
+  * Eyebrow: `Place an order`
+  * Heading: `Order mTORA`
+  * Lede: `Fill in your details below. You'll get an order ID, and we'll confirm on WhatsApp once payment is verified.`
+* **Form Panel:**
+  * Header Tag: `mTORA Order Form`
+  * Right Tag: `Secure & direct to our team`
+  * Error Banner: `Something went wrong while placing your order. Please check your connection and try again.`
+* **Form Labels & Placeholders:**
+  * `Full Name` (Placeholder: `e.g. Name`) — Err: `Please enter your name.`
+  * `Mobile Number` (Placeholder: `10-digit mobile number`) — Err: `Enter a valid 10-digit mobile number.`
+  * `WhatsApp Number` (Placeholder: `10-digit WhatsApp number`) — Err: `Enter a valid 10-digit WhatsApp number.`
+  * Checkbox: `Same as mobile number`
+  * `Delivery Address (house/flat no., street, landmark)` (Placeholder: `Full delivery address`) — Err: `Please enter your delivery address.`
+  * `Select Pack` (Options: `Pack of 1 — ₹45`, `Pack of 2 — ₹9̶0̶ ₹80 (10% OFF)`, `Pack of 5 — ₹1̶8̶0̶ ₹160 (10% OFF)`) — Err: `Please choose a pack.`
+  * `Number of Packs` (Stepper: default `1`)
+  * `Delivery Zone (distance from Attapur)` (Options: `0 – 5 km (Free Delivery)`, `5 – 10 km (+₹15)`, `10 – 15 km (+₹25)`, `Above 15 km (+₹50)`) — Err: `Please choose your delivery zone.`
+  * `Your Area / Locality` (Dynamic dropdown dependent on zone) — Err: `Please select your locality.`
+  * `Delivery Day` (Options: `Today`, `Tomorrow`) — Err: `Please choose a delivery day.`
+  * `Delivery Slot` (Options: `7 - 9 AM`, `7 - 9 PM`) — Err: `Please choose a delivery slot.`
+  * `Payment Mode` (Options: `UPI Payment Now`, `Cash/UPI on Delivery (+₹15 COD charge)`)
+  * `Order Notes (optional)` (Placeholder: `Preferred delivery time, special instructions, etc.`)
+* **Summary Labels:**
+  * `Pack price × quantity`
+  * `Delivery charge` (`FREE` tag or `₹...`)
+  * `COD charge` (`₹15`)
+  * `Total Payable`
+* **Submit Action:**
+  * Button: `Place Order` (Loading: `Placing your order…`)
+  * Note: `By placing an order you agree to be contacted on WhatsApp for order & payment confirmation.`
+* **Confirmation View:**
+  * Heading: `Order placed successfully!`
+  * Lede: `Save your Order ID below. Tap the button to message us on WhatsApp and complete your payment.`
+  * Badge: `Your Order ID` (e.g. `MTR-000000-001`)
+  * Actions: `Notify & Pay on WhatsApp`, `View Protein Report`, `Place Another Order`
+* **Sidebar:**
+  * Card 1: `What happens next`
+    1. `You place your order — it's logged instantly to our system.`
+    2. `You get a unique Order ID right away, on this page.`
+    3. `Tap "Notify & Pay on WhatsApp" to confirm & complete payment.`
+    4. `Once we verify payment, you'll get a confirmation on WhatsApp.`
+  * Card 2: `Need help ordering?` — `Message us directly on Instagram or WhatsApp and our team will help you place your order.`
+
+---
+
+## 8. Current JS → Next.js Migration Map
+
+| Existing Vanilla JS Pattern | Target Architecture in Next.js 16 / React 19 | Target File / Module | Rationale |
+| :--- | :--- | :--- | :--- |
+| `document.addEventListener('DOMContentLoaded', ...)` | Standard React component lifecycle & React hydration | Root Layout & Component mounts | React natively executes mount logic via components |
+| `window.addEventListener('scroll', onScroll)` for sticky nav class toggle | `useEffect` with passive scroll listener updating `useState` boolean | `src/components/layout/Navbar.tsx` | Declarative UI: classes applied based on state, clean listener teardown |
+| Direct DOM style mutation: `document.documentElement.style.setProperty('--promo-offset', ...)` | CSS module / inline style / custom React hook managing layout offset | `src/components/layout/PromoBar.tsx` | Eliminates untracked global CSS side-effects |
+| Imperative burger toggling and `document.body.style.overflow = 'hidden'` | Controlled `isOpen` state in `Navbar`; `useEffect` sets/resets `overflow` on body on cleanup | `src/components/layout/Navbar.tsx` | Avoids body overflow remaining permanently locked if navigation unmounts |
+| Global `IntersectionObserver` adding `.is-visible` to querySelector `.reveal` | Custom reusable hook `useScrollReveal` or CSS `animation-timeline: view()` where supported | `src/lib/useScrollReveal.ts` or pure CSS animation | Replaces global unmanaged DOM queries with scoped, declarative refs |
+| Image `onerror="this.remove()"` | Next.js `<Image>` with fallback state via `onError={() => setImgFailed(true)}` | `src/components/home/HeroSection.tsx` | Next.js image optimization and controlled fallback rendering |
+| Manual Carousel: `track.scrollTo(...)`, manual dot generation, scroll listener calculating active index | Controlled carousel state with `useRef<HTMLDivElement>`, dynamic dots rendered from array `.map()` | `src/components/home/ReelsSection.tsx` | Replaces imperative `document.createElement('button')` with clean React elements |
+| Lightbox Modal: imperative DOM insertion `modalInner.insertBefore(video, ...)`, `addEventListener('keydown')` | Declarative Modal component with conditional rendering, keyboard listeners bound via React `useEffect` | `src/components/home/ReelModal.tsx` | Eliminates DOM nodes replacement bugs and memory leaks |
+| In-card Video IntersectionObserver checking `entry.isIntersecting` to call `video.play()` / `video.pause()` | Scoped `useIntersectionObserver` hook per `ReelCard` component | `src/components/home/ReelCard.tsx` | Component-isolated autoplay logic without querySelector traversal |
+| Cascading dropdown option insertion (`elLocation.appendChild(opt)`) | Pure derived state in React. Dependent select renders options by mapping over data arrays | `src/components/order/OrderForm.tsx` | React handles DOM mutation; single source of truth for zone & area lists |
+| Form submit hijacking: `fetch(APPS_SCRIPT_URL)` with raw string parsing & custom error flags | React 19 `useActionState` or standard typed async handler submitting to a dedicated server action / API route | `src/components/order/OrderForm.tsx` or `src/app/order/actions.ts` | Type safety, CSRF protection, and separation of backend secrets |
+| Direct mutation of `#confirmTable.innerHTML = rows.map(...)` | React JSX table mapping structured state object | `src/components/order/OrderConfirmation.tsx` | Eliminates dangerous raw HTML injection (`innerHTML`) |
+| PDF detection: `fetch(obj.data, { method: 'HEAD' })` | Client-side `useEffect` or server-side head probe setting PDF ready status | `src/components/protein-report/ReportViewer.tsx` | Safe declarative fallback handling |
+
+---
+
+## 9. Page-by-Page Implementation Plan
+
+### Sequential Implementation Order
+
+#### Phase 1: Shared Core & Layout Foundation
+1. **Design Tokens & Global CSS Setup:**
+   * Migrate variables into `src/app/globals.css` (navy, cream, paper, wheat, charcoal, font variables).
+   * Configure Google Fonts (`Space Grotesk`, `Inter`, `Space Mono`) via `next/font/google` in [src/app/layout.tsx](file:///d:/Abdul%20Quader/b/mTORA/mtora-frontend/src/app/layout.tsx).
+   * Implement [GrainOverlay.tsx](file:///d:/Abdul%20Quader/b/mTORA/mtora-frontend/src/components/layout/GrainOverlay.tsx).
+2. **Shared Layout Components:**
+   * Implement [Navbar.tsx](file:///d:/Abdul%20Quader/b/mTORA/mtora-frontend/src/components/layout/Navbar.tsx) and [MobileMenu.tsx](file:///d:/Abdul%20Quader/b/mTORA/mtora-frontend/src/components/layout/MobileMenu.tsx) with scroll detection & drawer toggle.
+   * Implement [Footer.tsx](file:///d:/Abdul%20Quader/b/mTORA/mtora-frontend/src/components/layout/Footer.tsx).
+
+#### Phase 2: Home Page (`/`)
+1. **PromoBar:** Scroll dismiss logic, hover pause, marquee animation.
+2. **HeroSection:** Headline, 15g stat, puff ring SVGs, roti image with fallback.
+3. **AboutSection:** Video player with autoplay/loop/muted, layout grid.
+4. **BenefitsSection:** 5-card grid layout with feature card spanning 2 columns.
+5. **MealFitSection:** Horizontal scroll chip row with gradient swatches.
+6. **ReelsSection:** Track carousel, ReelCard item, scroll snapping, mute toggle, dot indicators.
+7. **ReelModal:** Lightbox video player, keyboard bindings (Esc, Left, Right), backdrop close.
+8. **FinalCtaSection:** Closing CTA banner.
+
+#### Phase 3: Protein Report Page (`/protein-report`)
+1. **ReportHero:** Title, breadcrumb/eyebrow, and background radial gradient.
+2. **ReportViewer:** PDF viewer frame, download action buttons, and asynchronous fallback state.
+3. **ReportTrustGrid:** 3 trust certification cards.
+
+#### Phase 4: Order Page (`/order`)
+1. **Domain Types & Contracts:** Type definitions for Pack, Zone, Slot, and Order payload in `src/types/order.ts`.
+2. **OrderHero & OrderSidebar:** Context header, 4-step walkthrough card, help card.
+3. **QuantityStepper:** Controlled numeric stepper [1, 20].
+4. **OrderSummary:** Real-time formula breakdown for pack price, delivery fee, and COD.
+5. **OrderForm:** Inputs for Name, Mobile, WhatsApp, "Same as mobile", Address, Zone/Area cascading selects, Day/Slot cascading selects, Payment mode, Notes, and validation.
+6. **OrderConfirmation:** Successful receipt view, order ID card, breakdown table, and WhatsApp deep-link builder.
+
+### Shared Components Identification
+* **Global Navigation:** `Navbar`, `MobileMenu` (used on all 3 pages).
+* **Global Footer:** `Footer` (used on all 3 pages).
+* **Atmospheric Overlay:** `GrainOverlay` (used on all 3 pages).
+* **Shared SVG Icons / Badges:** Chevron, arrow, shield-check, and concentric ring marks.
+
+---
+
+## 10. Architectural Risks & Legacy Code Flags
+
+### 1. Critical Markup Malformation in `index.html` (Reels Section)
+* **Finding:** In `index.html` (around line 485), the 6th reel card has an unclosed `.reel-controls-mini` tag. The `<div class="reel-dots" id="reelDots"></div>` container was accidentally placed *inside* the 6th reel card's control bar, and the `.reel-track` closing `</div>` was omitted entirely before `</section>`.
+* **Product Intent:** The reel dots must render *below* the entire carousel track across all 6 cards, centered horizontally, and all 6 cards must reside as direct children of the scroll track.
+* **Migration Action:** Correct the semantic nesting in `ReelsSection.tsx` so `ReelDots` sits outside the track container and all cards close cleanly.
+
+### 2. Copied Unused JavaScript Bloat
+* **Finding:** Both `protein-report.html` and `order.html` include the entire 150-line Reels carousel and Lightbox script at the bottom of their pages, even though neither page has a reel track or modal.
+* **Migration Action:** Encapsulate carousel and lightbox behavior strictly inside `ReelsSection.tsx` and `ReelModal.tsx`. Do not leak reel script logic to `/protein-report` or `/order`.
+
+### 3. Imperative DOM Element Creation in Lightbox
+* **Finding:** In the legacy code, opening the reel lightbox calls `document.createElement('video')` or clone nodes and injects them via `insertBefore`, while manual cleanup `oldMedia.remove()` is called on step transitions.
+* **Migration Action:** Use standard React conditional rendering (`<video key={currentIndex} ... />`) to ensure deterministic media mounting and unmounting without memory leaks.
+
+### 4. Raw `innerHTML` Injection on Order Confirmation
+* **Finding:** `confirmTable.innerHTML = rows.map(...).join('')` injects raw unescaped strings directly from form inputs into the DOM.
+* **Migration Action:** Render structured JSX elements (`rows.map(([label, val]) => <div key={label} ...>{val}</div>)`), preventing XSS vectors.
+
+### 5. Fragile Global Inline Event Handlers & Input Loops
+* **Finding:** `sameAsMobile` and digits-only inputs use imperative event handlers with mutual event triggering that could cause infinite loops or detached input values.
+* **Migration Action:** Use controlled React state handlers: WhatsApp updates automatically when `sameAsMobile === true`, and phone input is sanitized via a pure formatting function during state update.
+
+### 6. Mobile Browser Quirks with `<object>` / `<iframe>` PDF Embeds
+* **Finding:** Mobile Safari and Android Chrome frequently fail to render inline PDF `<object>` elements, producing blank gray boxes instead of document pages.
+* **Migration Action:** Preserve the fallback detection behavior and ensure the "View Full Report" / "Download Report" links are prominent touch targets so mobile users have an uninterrupted viewing path.
+
+---
+
+## 11. API Integration Boundary
+
+*Note: In accordance with project instructions, no API calls or backend changes are implemented in this analysis step.*
+
+Below is the mapping between frontend components and the eventual backend service contracts:
+
+| Component | Target Endpoint | HTTP Method | Data Flow & Purpose |
+| :--- | :--- | :--- | :--- |
+| `OrderForm.tsx` (Pack Selector) | `/packs` | `GET` | Fetches available active packs, roti counts, pricing, and discount display badges to dynamically populate the pack dropdown. |
+| `OrderForm.tsx` (Pack Details) | `/packs/{pack_id}` | `GET` | (Optional/Detailed) Fetches pack nutritional metadata or stock limits if required. |
+| `OrderForm.tsx` (Customer Capture) | `/customers` | `POST` | Creates a new customer record from `custName`, `mobileNumber`, `whatsappNumber`, and `address`. |
+| `OrderForm.tsx` (Customer Prefill) | `/customers/{customer_id}` | `GET` | Returns stored address and contact details for returning customers. |
+| `OrderForm.tsx` (Customer Update) | `/customers/{customer_id}` | `PUT` | Updates existing customer details or delivery preferences. |
+| `OrderForm.tsx` (Order Dispatch) | `/orders` | `POST` | Submits the completed order payload structured according to backend contract: |
+
+### Backend Order Submission Contract
+```typescript
+interface CreateOrderPayload {
+  customer_id: string;
+  order_id?: string;
+  payment_mode?: "UPI" | "COD";
+  notes?: string;
+  delivery_slot?: string;       // e.g. "7 - 9 PM"
+  delivery_day?: string;        // e.g. "today" | "tomorrow"
+  items: Array<{
+    pack_id: string;
+    quantity: number;
+  }>;
+}
+```
+
+### Confirmation & Status Inspection
+* `OrderConfirmation.tsx` will consume the response of `POST /orders` (which returns the generated `order_id` and total).
+* Future order tracking will map to `GET /orders/{order_id}` and cancellation/updates to `PUT /orders/{order_id}`.
+
+---
+
+## 12. Proposed Final Project Tree
+
+The target Next.js structure avoids generic UI abstractions, stores, or unnecessary layers, focusing strictly on concrete component responsibilities:
+
+```
+mtora-frontend/
+├── public/
+│   └── assets/
+│       ├── hero/
+│       │   └── roti.png
+│       ├── about/
+│       │   └── about.mp4
+│       ├── meals/
+│       │   ├── dal.png
+│       │   ├── paneer.png
+│       │   ├── sabzi.png
+│       │   ├── curd.png
+│       │   ├── eggs.png
+│       │   └── chicken.png
+│       ├── reels/
+│       │   ├── reel-1.mp4 ... reel-6.mp4
+│       │   └── reel-1-poster.jpg ... reel-6-poster.jpg
+│       └── protein-report.pdf
+├── src/
+│   ├── app/
+│   │   ├── globals.css                (Consolidated design tokens & base styles)
+│   │   ├── layout.tsx                 (Root layout: metadata, fonts, GrainOverlay, Navbar, Footer)
+│   │   ├── page.tsx                   (Home route assembling home sections)
+│   │   ├── protein-report/
+│   │   │   └── page.tsx               (Protein report route)
+│   │   └── order/
+│   │       └── page.tsx               (Order route)
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── PromoBar.tsx           ("use client": marquee & dismiss behavior)
+│   │   │   ├── Navbar.tsx             ("use client": sticky scroll & mobile drawer)
+│   │   │   ├── MobileMenu.tsx         ("use client": mobile drawer overlay)
+│   │   │   ├── GrainOverlay.tsx       (Server: SVG turbulence filter)
+│   │   │   └── Footer.tsx             (Server: static site footer)
+│   │   ├── home/
+│   │   │   ├── HeroSection.tsx        ("use client": roti photo error fallback & scroll pulse)
+│   │   │   ├── AboutSection.tsx       (Server: video embed & brand narrative)
+│   │   │   ├── BenefitsSection.tsx    (Server: 5 benefits card grid)
+│   │   │   ├── MealFitSection.tsx     (Server: horizontal scroll meal chips)
+│   │   │   ├── ReelsSection.tsx       ("use client": carousel track, dots & arrow navigation)
+│   │   │   ├── ReelCard.tsx           ("use client": in-view autoplay & mute toggle)
+│   │   │   ├── ReelModal.tsx          ("use client": lightbox video player & keyboard controls)
+│   │   │   └── FinalCtaSection.tsx    (Server: closing conversion banner)
+│   │   ├── protein-report/
+│   │   │   ├── ReportHero.tsx         (Server: report page header)
+│   │   │   ├── ReportViewer.tsx       ("use client": PDF object/iframe with fallback probe)
+│   │   │   └── ReportTrustGrid.tsx    (Server: 3 trust cards)
+│   │   └── order/
+│   │       ├── OrderHero.tsx          (Server: order header)
+│   │       ├── OrderForm.tsx          ("use client": inputs, cascading selects, validation, submit)
+│   │       ├── QuantityStepper.tsx    ("use client": pack quantity incrementer [1-20])
+│   │       ├── OrderSummary.tsx       (Server/Client: live pricing breakdown)
+│   │       ├── OrderConfirmation.tsx  ("use client": confirmation receipt & WhatsApp button)
+│   │       └── OrderSidebar.tsx       (Server: steps walkthrough & support card)
+│   ├── lib/
+│   │   ├── api.ts                     (API client for /packs, /customers, /orders)
+│   │   └── constants.ts               (ZONES, LOCATIONS, SLOTS, WHATSAPP_NUMBER constants)
+│   └── types/
+│       ├── order.ts                   (Order payload, customer, form state definitions)
+│       └── pack.ts                    (Pack entity definitions)
+├── next.config.ts
+├── package.json
+└── tsconfig.json
+```
+
+---
+
+## Migration Readiness
+
+### What is Fully Understood
+1. **Design Tokens & System:** All colors, typography pairings, line treatments, container bounds, radii, and signature motifs (concentric puff rings and grain filter) are extracted from the source CSS.
+2. **Product Behavior & User Flows:**
+   - Home landing page scroll journey, video player, and reel lightbox modal interactions.
+   - Protein report viewing, fallback messaging, and document download flow.
+   - Order checkout form, field validation rules, zone-to-area and day-to-slot cascading selections, price calculation formulas, and WhatsApp confirmation dispatch.
+3. **Responsive Breakpoints:** All layout grid adjustments, typography clamps, and visibility shifts across desktop, tablet, and mobile are documented.
+4. **Backend Contract Integration:** The mapping between the Order form and the `/packs`, `/customers`, and `/orders` endpoints is mapped out.
+
+### What Requires Clarification Before Implementation
+1. **Asset File Availability:** The media files (`assets/hero/roti.png`, `assets/about/about.mp4`, `assets/meals/*.png`, `assets/reels/*.mp4`, `assets/protein-report.pdf`) are referenced in the HTML but are not yet present in the project's `public/` directory. Should we expect these to be supplied/copied, or will we generate/substitute placeholders initially?
+2. **Order Submission Destination:** The reference HTML posted orders to a Google Apps Script Web App (`APPS_SCRIPT_URL`). During the upcoming Next.js implementation, should the order form connect directly to the defined backend endpoints (`POST /customers`, `POST /orders`), or should it maintain compatibility with the Apps Script endpoint until the backend is connected?
+3. **WhatsApp Notification Number:** The reference hardcodes `+919030999072`. Please confirm if this should be retained as an environment variable in the new project.
+
+### What Should NOT Be Implemented Yet
+1. **No React component creation or UI modification:** The existing placeholder files in `src/app/` remain untouched.
+2. **No package installation:** Do not install unnecessary animation or styling libraries.
+3. **No premature API calling:** Do not mock or execute network calls until the component architecture and contracts are approved.
+
+---
+*Analysis complete. Awaiting user review and approval before proceeding.*

@@ -1,0 +1,32 @@
+﻿# Dependencies / builds
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.sqlite3
+*.db
+
+# Environment / secrets
+.env
+.env*.local
+!.env.example
+
+# Duplicate / unnecessary files
+mtora-frontend/mtora-backend/
+mtora-frontend/Pics/
+mtora-backend.zip
+*.pptx
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>mTORA — 15g Protein Per Roti</title>
+<meta name="description" content="mTORA Protein Roti — your everyday roti, now packed with 15g of protein. See the lab-verified protein report.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   mTORA — Design System
+   Deep navy / warm cream / charcoal / wheat gold
+   Display: Space Grotesk · Body: Inter · Utility/Data: Space Mono
+   Signature motif: the "puff ring" — concentric rings echoing a roti
+   puffing with heat on a tawa. Used behind the hero number, as section
+   dividers, and around key data points on the Protein Report page.
+   ========================================================================== */
+
+:root{
+  --navy: #363A2D;
+  --navy-2: #454A38;
+  --navy-3: #5B6249;
+  --cream: #F4E8DA;
+  --cream-2: #EADFC8;
+  --paper: #FAF3E7;
+  --charcoal: #221E1A;
+  --charcoal-soft: #4A443C;
+  --wheat: #C79A4B;
+  --wheat-light: #E4C588;
+  --wheat-dim: #8a6f3c;
+  --line: rgba(34,30,26,0.12);
+  --line-dark: rgba(244,232,218,0.14);
+
+  --display: "Space Grotesk", "Arial Narrow", sans-serif;
+  --body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: "Space Mono", "Courier New", monospace;
+
+  --container: 1240px;
+  --radius-lg: 32px;
+  --radius-md: 20px;
+  --radius-sm: 12px;
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+}
+
+*, *::before, *::after{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior: auto; }
+  *, *::before, *::after{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+body{
+  margin:0;
+  font-family: var(--body);
+  background: var(--cream);
+  color: var(--charcoal);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img{ max-width:100%; display:block; }
+a{ color: inherit; text-decoration: none; }
+button{ font-family: inherit; cursor:pointer; }
+ul{ margin:0; padding:0; list-style:none; }
+
+.wrap{
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 clamp(20px, 6vw, 28px);
+}
+
+/* Grain overlay — gives flat colour fields a tactile, food-adjacent texture */
+.grain{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+
+/* Focus visibility */
+a:focus-visible, button:focus-visible, iframe:focus-visible{
+  outline: 2px solid var(--wheat);
+  outline-offset: 3px;
+}
+
+/* ---------- Type scale ---------- */
+h1,h2,h3,h4{
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 1.02;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.eyebrow{
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wheat-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before{
+  content:"";
+  width: 22px; height: 1px;
+  background: var(--wheat);
+  display:inline-block;
+}
+.eyebrow--light{ color: var(--wheat-light); }
+.why {
+  text-transform: uppercase;
+}
+
+.brand-name {
+  text-transform: none;
+}
+.why {
+  text-transform: uppercase;
+}
+
+.brand-name {
+  text-transform: none;
+}
+p{ margin:0; }
+.lede{
+  font-size: clamp(17px, 1.6vw, 20px);
+  line-height: 1.55;
+  color: var(--charcoal-soft);
+}
+
+/* ---------- Promo bar ---------- */
+.promo-bar{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 600;
+  background: var(--navy);
+  color: var(--cream);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .04em;
+  padding: 10px 0;
+  line-height: 1.4;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.promo-bar b{ color: var(--wheat-light); }
+.promo-track{
+  display: inline-flex;
+  align-items: center;
+  animation: promoScroll 18s linear infinite;
+  will-change: transform;
+}
+.promo-bar:hover .promo-track{ animation-play-state: paused; }
+.promo-item{
+  padding: 0 40px;
+  flex: 0 0 auto;
+}
+@keyframes promoScroll{
+  from{ transform: translateX(0); }
+  to{ transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce){
+  .promo-track{ animation: none; }
+}
+/* ---------- Buttons ---------- */
+.btn{
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 14.5px;
+  letter-spacing: 0.02em;
+  padding: 16px 30px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform .35s var(--ease), background .3s ease, color .3s ease, border-color .3s ease;
+  white-space: nowrap;
+}
+.btn:hover{ transform: translateY(-2px); }
+.btn:active{ transform: translateY(0); }
+
+.btn--primary{ background: var(--wheat); color: var(--navy); }
+.btn--primary:hover{ background: var(--wheat-light); }
+
+.btn--ghost-dark{ background: transparent; color: var(--navy); border-color: rgba(54,58,45,0.3); }
+.btn--ghost-dark:hover{ border-color: var(--navy); background: rgba(54,58,45,0.05); }
+
+.btn--ghost-light{ background: transparent; color: var(--cream); border-color: rgba(244,232,218,0.35); }
+.btn--ghost-light:hover{ border-color: var(--cream); background: rgba(244,232,218,0.08); }
+
+.btn--on-navy{ background: var(--cream); color: var(--navy); }
+.btn--on-navy:hover{ background: #fff; }
+
+.btn--sm{ padding: 12px 22px; font-size: 13.5px; }
+
+/* ---------- Nav ---------- */
+.nav{
+  position: fixed;
+  top: var(--promo-offset, 0px); left: 0; right: 0;
+  z-index: 500;
+  padding: 18px 0;
+  background: #fff;
+  box-shadow: 0 1px 0 var(--line);
+}
+.nav.is-scrolled{
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  padding: 12px 0;
+  box-shadow: 0 1px 0 var(--line);
+}
+.nav .wrap{ display:flex; align-items:center; justify-content: space-between; gap: 24px; }
+
+.logo{
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo .dot{ color: var(--wheat); }
+
+.nav-links{ display:flex; align-items:center; gap: 8px; }
+.nav-links a{
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border-radius: 100px;
+  color: var(--charcoal-soft);
+  transition: background .3s ease, color .3s ease;
+}
+.nav-links a:hover, .nav-links a.active{ background: rgba(54,58,45,0.06); color: var(--navy); }
+
+.nav-right{ display:flex; align-items:center; gap: 14px; }
+
+.nav-burger{
+  display:none;
+  width: 44px; height: 44px;
+  border-radius: 100px;
+  border: 1px solid rgba(54,58,45,0.2);
+  background: transparent;
+  position: relative;
+  flex: none;
+}
+.nav-burger span{
+  position:absolute; left: 12px; right: 12px; height: 2px; background: var(--navy);
+  transition: transform .3s var(--ease), opacity .3s ease;
+}
+.nav-burger span:nth-child(1){ top: 16px; }
+.nav-burger span:nth-child(2){ top: 22px; }
+.nav-burger span:nth-child(3){ top: 28px; }
+.nav-burger.is-open span:nth-child(1){ transform: translateY(6px) rotate(45deg); }
+.nav-burger.is-open span:nth-child(2){ opacity: 0; }
+.nav-burger.is-open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
+
+.mobile-menu{
+  position: fixed; inset: 0;
+  background: var(--navy);
+  z-index: 480;
+  display:flex; flex-direction: column;
+  padding: 100px 32px 40px;
+  transform: translateY(-100%);
+  transition: transform .5s var(--ease);
+}
+.mobile-menu.is-open{ transform: translateY(0); }
+.mobile-menu a{
+  font-family: var(--display);
+  font-size: 34px;
+  color: var(--cream);
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line-dark);
+}
+.mobile-menu .btn{ margin-top: 28px; align-self: flex-start; }
+
+@media (max-width: 880px){
+  .nav-links{ display:none; }
+  .nav-burger{ display:block; }
+  .nav-right .btn--primary{ display:none; }
+}
+
+/* ---------- Reveal-on-scroll ---------- */
+.reveal{
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .9s var(--ease), transform .9s var(--ease);
+}
+.reveal.is-visible{ opacity: 1; transform: translateY(0); }
+.reveal-scale{ opacity:0; transform: scale(.94); transition: opacity 1s var(--ease), transform 1s var(--ease); }
+.reveal-scale.is-visible{ opacity:1; transform: scale(1); }
+
+/* ---------- Hero ---------- */
+.hero{
+  position: relative;
+  min-height: 100svh;
+  background: var(--navy);
+  color: var(--cream);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding-top: 96px;
+}
+.hero::before{
+  /* soft warm floor glow, like tawa heat */
+  content:"";
+  position: absolute;
+  bottom: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140%;
+  height: 60%;
+  background: radial-gradient(closest-side, rgba(199,154,75,0.16), transparent 70%);
+  pointer-events: none;
+}
+.hero-grid{
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 40px;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  padding: 40px 0 64px;
+}
+.hero-number{
+  font-family: var(--body);
+  font-weight: 800;
+  font-size: clamp(76px, 10vw, 144px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  margin: 18px 0 6px;
+}
+.hero-number sup{
+  font-family: var(--mono);
+  font-size: 0.19em;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--wheat-light);
+  margin-left: 10px;
+  vertical-align: 42%;
+}
+.hero-per{
+  font-family: var(--mono);
+  font-size: 15px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--wheat-light);
+  margin-bottom: 26px;
+}
+.hero-headline{
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(21px, 2.2vw, 27px);
+  line-height: 1.3;
+  color: var(--cream);
+  max-width: 520px;
+  margin-bottom: 14px;
+}
+.hero-copy{
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: rgba(244,232,218,0.68);
+  max-width: 440px;
+  margin-bottom: 34px;
+}
+.hero-ctas{ display:flex; gap: 14px; flex-wrap: wrap; }
+
+.hero-visual{
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-top: 105%; /* bulletproof aspect-ratio fallback: all children are absolutely positioned, so height:0 + padding-top keeps this box a real, non-collapsing size on every browser/viewport */
+  display:flex; align-items:center; justify-content:center;
+}
+.puff-ring{
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(228,197,136,0.22);
+}
+.hero-visual .roti-plate{
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 78%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  z-index: 3;
+}
+.hero-visual .roti-photo{
+  object-fit: cover;
+  z-index: 4;
+  box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+}
+.hero-scan{
+  position:absolute; top: 6%; right: 4%;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  color: var(--wheat-light);
+  text-align: right;
+  line-height: 1.7;
+  z-index: 4;
+}
+.hero-scan b{ color: var(--cream); font-weight: 600; }
+
+.scroll-cue{
+  position:absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  display:flex; flex-direction: column; align-items:center; gap: 8px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.2em;
+  color: rgba(244,232,218,0.5); text-transform: uppercase;
+  z-index: 3;
+}
+.scroll-cue .line{ width:1px; height: 30px; background: linear-gradient(var(--wheat), transparent); animation: scrollpulse 2.2s ease infinite; }
+@keyframes scrollpulse{ 0%{ opacity: .2; } 50%{ opacity: 1; } 100%{ opacity: .2; } }
+
+@media (max-width: 880px){
+  .hero-grid{ grid-template-columns: 1fr; padding-top: 8px; text-align:center; }
+  .hero-visual{ order: -1; width: 100%; max-width: 320px; margin: 0 auto 8px; padding-top: 100%; }
+  .hero{ padding-top: 88px; }
+  .hero .eyebrow{ justify-content:center; }
+  .hero-headline{ margin-left:auto; margin-right:auto; }
+  .hero-copy{ margin-left:auto; margin-right:auto; }
+  .hero-ctas{ justify-content:center; }
+  .hero-scan{ text-align:center; left:0; right:0; margin:0 auto; }
+}
+
+/* ---------- Section shells ---------- */
+section{ position: relative; }
+.section{ padding: 120px 0; }
+.section--tight{ padding: 90px 0; }
+.section--navy{ background: var(--navy); color: var(--cream); }
+.section--cream2{ background: var(--cream-2); }
+@media (max-width: 880px){
+  .section{ padding: 80px 0; }
+  .section--tight{ padding: 64px 0; }
+}
+
+/* ---------- About ---------- */
+.about-grid{
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 64px;
+  align-items: center;
+}
+.about-copy h2{ font-size: clamp(32px, 4vw, 48px); margin: 18px 0 22px; max-width: 480px; }
+.about-copy p + p{ margin-top: 16px; }
+.about-copy .lede{ margin-bottom: 6px; }
+.about-visual{
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  background:
+    radial-gradient(120% 90% at 20% 0%, rgba(228,197,136,0.5), transparent 55%),
+    linear-gradient(155deg, var(--navy) 0%, var(--navy-2) 55%, var(--navy-3) 100%);
+}
+.about-visual video{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.about-visual .grain-tex{ position:absolute; inset:0; opacity:.12; mix-blend-mode: overlay; }
+.about-tag{
+  position:absolute; left: 24px; bottom: 24px;
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--cream); background: rgba(54,58,45,0.55); backdrop-filter: blur(6px);
+  padding: 10px 16px; border-radius: 100px; border: 1px solid rgba(244,232,218,0.25);
+}
+@media (max-width: 880px){
+  .about-grid{ grid-template-columns: 1fr; gap: 36px; }
+  .about-visual{ order: -1; aspect-ratio: 16/10; }
+}
+
+/* ---------- Benefits ---------- */
+.benefits-head{ max-width: 680px; margin-bottom: 56px; }
+.benefits-head h2{ font-size: clamp(34px, 4.6vw, 56px); margin: 16px 0 18px; }
+.benefits-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.benefit-card{
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 34px 28px;
+  min-height: 240px;
+  display:flex; flex-direction: column;
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease), border-color .45s ease;
+}
+.benefit-card:hover{ transform: translateY(-6px); box-shadow: 0 22px 44px -24px rgba(54,58,45,0.35); border-color: rgba(199,154,75,0.4); }
+.benefit-num{ font-family: var(--mono); font-size: 12.5px; color: var(--wheat-dim); letter-spacing: .12em; }
+.benefit-icon{ margin: 18px 0 20px; width: 40px; height: 40px; color: var(--wheat); }
+.benefit-card h3{ font-size: 21px; line-height: 1.15; margin-bottom: 10px; }
+.benefit-card p{ color: var(--charcoal-soft); font-size: 14.5px; line-height: 1.55; margin-top: auto; }
+.benefit-card--feature{
+  grid-column: span 2;
+  background: var(--navy);
+  color: var(--cream);
+  border: none;
+}
+.benefit-card--feature .benefit-num{ color: var(--wheat-light); }
+.benefit-card--feature p{ color: rgba(244,232,218,0.7); }
+.benefit-card--feature h3{ font-size: 26px; }
+
+@media (max-width: 940px){
+  .benefits-grid{ grid-template-columns: 1fr 1fr; }
+  .benefit-card--feature{ grid-column: span 2; }
+}
+@media (max-width: 640px){
+  .benefits-grid{ grid-template-columns: 1fr; }
+  .benefit-card--feature{ grid-column: span 1; }
+}
+
+/* ---------- Meal fit ---------- */
+.mealfit-head{ text-align:center; max-width: 640px; margin: 0 auto 52px; }
+.mealfit-head h2{ font-size: clamp(32px, 4.4vw, 52px); margin: 16px 0 14px; }
+.meal-row{
+  display:flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 4px 20px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.meal-row::-webkit-scrollbar{ height: 6px; }
+.meal-row::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 10px; }
+.meal-chip{
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 168px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--cream-2);
+  border: 1px solid var(--line);
+}
+.meal-chip .swatch{
+  aspect-ratio: 1/1;
+  background: linear-gradient(150deg, var(--sw1), var(--sw2));
+  position: relative;
+}
+.meal-chip .swatch::after{
+  content:"";
+  position:absolute; inset:0;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.25), transparent 55%);
+}
+.meal-chip span{
+  display:block;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 12px 14px;
+  color: var(--charcoal);
+}
+.meal-plus{
+  flex: 0 0 auto;
+  width: 48px; height: 48px;
+  align-self: center;
+  border-radius: 50%;
+  border: 1px dashed var(--wheat-dim);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--wheat-dim);
+  font-family: var(--mono);
+}
+
+/* ---------- Reels ---------- */
+.reels-head{ display:flex; align-items:flex-end; justify-content: space-between; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
+.reels-head h2{ font-size: clamp(34px, 4.6vw, 54px); margin-top: 16px; }
+.reels-controls{ display:flex; gap: 10px; }
+.reel-arrow{
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1px solid var(--line-dark);
+  background: transparent; color: var(--cream);
+  display:flex; align-items:center; justify-content:center;
+  transition: background .3s ease, border-color .3s ease;
+}
+.reel-arrow:hover{ background: rgba(244,232,218,0.08); border-color: var(--wheat); }
+.reel-arrow:disabled{ opacity:.3; cursor:default; }
+.reel-arrow:disabled:hover{ background:transparent; border-color: var(--line-dark); }
+
+.reel-track{
+  display:flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 4px 4px 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.reel-track::-webkit-scrollbar{ display:none; }
+
+.reel-card{
+  position: relative;
+  flex: 0 0 auto;
+  width: 240px;
+  aspect-ratio: 9/16;
+  border-radius: 24px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  background: linear-gradient(160deg, var(--navy-2), var(--navy));
+  box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6);
+  cursor: pointer;
+  border: 1px solid rgba(244,232,218,0.08);
+}
+.reel-card video, .reel-card .reel-poster{
+  position:absolute; inset:0; width:100%; height:100%; object-fit: cover;
+}
+.reel-poster{
+  background: radial-gradient(140% 100% at 30% 0%, rgba(228,197,136,.28), transparent 60%), linear-gradient(180deg, var(--navy-2), var(--navy));
+  display:flex; align-items:center; justify-content:center;
+}
+.reel-poster svg{ width: 30%; opacity:.5; }
+.reel-shade{ position:absolute; inset:0; background: linear-gradient(to top, rgba(54,58,45,0.85) 0%, transparent 42%); }
+.reel-meta{ position:absolute; left:14px; right:14px; bottom:14px; color: var(--cream); z-index:2; }
+.reel-meta .name{ font-family: var(--display); font-weight:600; font-size: 14.5px; }
+.reel-meta .tag{ font-family: var(--mono); font-size: 10.5px; color: var(--wheat-light); letter-spacing:.08em; }
+.reel-controls-mini{ position:absolute; top:12px; right:12px; z-index:3; display:flex; gap:8px; }
+.reel-btn{
+  width: 34px; height:34px; border-radius:50%;
+  background: rgba(54,58,45,0.55); backdrop-filter: blur(4px);
+  border: 1px solid rgba(244,232,218,0.25);
+  color: var(--cream); display:flex; align-items:center; justify-content:center;
+}
+.reel-btn svg{ width:15px; height:15px; }
+.reel-play-badge{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:2;
+}
+.reel-play-badge svg{ width:52px; height:52px; opacity:.9; }
+
+.reel-dots{ display:flex; justify-content:center; gap: 8px; margin-top: 28px; }
+.reel-dots button{
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(244,232,218,0.25); border: none; padding:0;
+  transition: background .3s ease, width .3s ease;
+}
+.reel-dots button.active{ background: var(--wheat); width: 22px; border-radius: 4px; }
+
+.reels-cta{ text-align:center; margin-top: 40px; }
+
+@media (max-width:640px){
+  .reel-card{ width: 74vw; }
+}
+
+/* Reel modal */
+.reel-modal{
+  position: fixed; inset:0; z-index: 900;
+  background: rgba(10,14,24,0.92);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition: opacity .35s ease;
+  padding: 24px;
+}
+.reel-modal.is-open{ opacity:1; pointer-events:auto; }
+.reel-modal-inner{
+  position: relative;
+  width: min(380px, 90vw);
+  aspect-ratio: 9/16;
+  border-radius: 26px;
+  overflow: hidden;
+  background: var(--navy);
+  transform: scale(.92);
+  transition: transform .4s var(--ease);
+}
+.reel-modal.is-open .reel-modal-inner{ transform: scale(1); }
+.reel-modal-inner video, .reel-modal-inner .reel-poster{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.reel-modal-close{
+  position: absolute; top: -52px; right: 0;
+  width: 40px; height:40px; border-radius:50%;
+  background: rgba(244,232,218,0.1); color: var(--cream); border:1px solid rgba(244,232,218,.25);
+  display:flex; align-items:center; justify-content:center; z-index: 5;
+}
+.reel-modal-nav{
+  position:absolute; top:50%; transform: translateY(-50%);
+  width:44px; height:44px; border-radius:50%;
+  background: rgba(54,58,45,0.55); border:1px solid rgba(244,232,218,.25); color:var(--cream);
+  display:flex; align-items:center; justify-content:center; z-index:5;
+}
+.reel-modal-nav.prev{ left: -60px; }
+.reel-modal-nav.next{ right: -60px; }
+@media (max-width: 640px){
+  .reel-modal-nav.prev{ left: -6px; }
+  .reel-modal-nav.next{ right: -6px; }
+  .reel-modal-nav{ background: rgba(54,58,45,0.75); }
+}
+
+/* ---------- Final CTA ---------- */
+.final-cta{
+  background: var(--navy);
+  color: var(--cream);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.final-cta::before{
+  content:""; position:absolute; top:-30%; left:50%; transform: translateX(-50%);
+  width: 900px; height: 900px; border-radius:50%;
+  background: radial-gradient(closest-side, rgba(199,154,75,0.14), transparent 70%);
+}
+.final-cta .inner{ position:relative; z-index:2; max-width: 720px; margin: 0 auto; }
+.final-cta h2{ font-size: clamp(32px, 5vw, 54px); margin: 18px 0 16px; }
+.final-cta .lede{ color: rgba(244,232,218,0.7); margin-bottom: 36px; }
+.final-cta .ctas{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+/* ---------- Footer ---------- */
+.footer{ background: var(--charcoal); color: rgba(244,232,218,0.7); padding: 56px 0 28px; }
+.footer .wrap{ display:flex; flex-direction:column; gap: 30px; }
+.footer-top{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 24px; }
+.footer-top .logo{ color: var(--cream); }
+.footer-links{ display:flex; gap: 26px; flex-wrap: wrap; }
+.footer-links a{ font-family: var(--mono); font-size: 12.5px; letter-spacing:.08em; text-transform:uppercase; color: rgba(244,232,218,0.65); }
+.footer-links a:hover{ color: var(--wheat-light); }
+.footer-bottom{ border-top: 1px solid rgba(244,232,218,0.12); padding-top: 22px; font-size: 12.5px; font-family: var(--mono); color: rgba(244,232,218,0.4); }
+
+/* ---------- Protein Report page ---------- */
+.report-hero{
+  background: var(--navy); color: var(--cream);
+  padding: 176px 0 90px;
+  position: relative; overflow: hidden;
+}
+.report-hero::before{
+  content:""; position:absolute; top:-10%; right:-10%; width:60%; height:140%;
+  background: radial-gradient(closest-side, rgba(199,154,75,0.14), transparent 70%);
+}
+.report-hero .inner{ position:relative; z-index:2; max-width: 640px; }
+.report-hero h1{ font-size: clamp(36px, 5.4vw, 62px); margin: 18px 0 16px; }
+.report-hero .lede{ color: rgba(244,232,218,0.72); }
+
+.report-body{ padding: 90px 0 120px; }
+.report-viewer{
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  box-shadow: 0 40px 80px -50px rgba(54,58,45,0.4);
+  overflow: hidden;
+}
+.report-viewer-bar{
+  display:flex; align-items:center; justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  gap: 12px; flex-wrap: wrap;
+}
+.report-viewer-bar .file-tag{
+  display:flex; align-items:center; gap: 10px;
+  font-family: var(--mono); font-size: 12.5px; color: var(--charcoal-soft);
+}
+.report-viewer-bar .file-tag svg{ width:18px; height:18px; color: var(--wheat-dim); }
+.report-frame-wrap{ background: #EFEAE0; }
+.report-frame-wrap iframe{ width:100%; height: 80vh; border: none; display:block; }
+.report-fallback{
+  display:none;
+  padding: 90px 30px;
+  text-align:center;
+  flex-direction:column; align-items:center; gap: 18px;
+}
+.report-fallback.is-active{ display:flex; }
+.report-fallback svg{ width: 46px; height:46px; color: var(--wheat-dim); }
+.report-fallback h3{ font-size: 22px; }
+.report-fallback p{ color: var(--charcoal-soft); max-width: 420px; font-size: 14.5px; line-height:1.6; }
+.report-fallback code{ font-family: var(--mono); font-size: 12.5px; background: var(--cream-2); padding: 3px 8px; border-radius: 6px; }
+
+.report-actions{ display:flex; gap: 14px; justify-content:center; margin-top: 32px; flex-wrap: wrap; }
+
+.report-trust{
+  margin-top: 90px;
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 20px;
+}
+.trust-card{
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  padding: 28px; background: var(--paper);
+}
+.trust-card .ring-mark{ width:34px; height:34px; margin-bottom:16px; color: var(--wheat); }
+.trust-card h4{ font-family: var(--display); font-size: 17px; margin-bottom: 8px; }
+.trust-card p{ font-size: 13.5px; color: var(--charcoal-soft); line-height:1.55; }
+@media (max-width: 820px){
+  .report-trust{ grid-template-columns: 1fr; }
+  .report-frame-wrap iframe{ height: 65vh; }
+}
+
+/* Utility */
+.center{ text-align:center; }
+.mx-auto{ margin-left:auto; margin-right:auto; }
+
+</style>
+</head>
+<body>
+
+<div class="promo-bar" id="promoBar">
+  <div class="promo-track">
+    <span class="promo-item">🎉 <b>Launch Offer</b> — Get 10% OFF your first order!</span>
+    <span class="promo-item">🎉 <b>Launch Offer</b> — Get 10% OFF your first order!</span>
+    <span class="promo-item">🎉 <b>Launch Offer</b> — Get 10% OFF your first order!</span>
+    <span class="promo-item">🎉 <b>Launch Offer</b> — Get 10% OFF your first order!</span>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="grainFilter"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+</svg>
+<svg class="grain"><rect width="100%" height="100%" filter="url(#grainFilter)"/></svg>
+
+<!-- ================= NAV ================= -->
+<nav class="nav" id="siteNav">
+  <div class="wrap">
+    <a href="index" class="logo">mTORA</a>
+    <ul class="nav-links">
+      <li><a href="index" class="active">Home</a></li>
+      <li><a href="protein-report">Protein Report</a></li>
+      <li><a href="order">Order Now</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="order" class="btn btn--primary btn--sm">Order Now</a>
+      <button class="nav-burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index">Home</a>
+  <a href="protein-report">Protein Report</a>
+  <a href="order" >Order Now</a>
+  <a href="https://www.instagram.com/mtora.in?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Instagram</a>
+  <a class="btn btn--primary" href="protein-report">View Protein Report</a>
+</div>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow eyebrow--light">Everyday Indian Roti · Reinvented</span>
+      <div class="hero-number">15g<sup>PROTEIN</sup></div>
+      <div class="hero-per">Per Roti</div>
+      <h1 class="hero-headline">Your everyday roti, now packed with protein.</h1>
+      <p class="hero-copy">A convenient, high-protein roti made for everyday Indian meals — no shakes, no substitutions, no fuss.</p>
+      <div class="hero-ctas">
+        <a href="order.html" class="btn btn--primary">Order Now</a>
+        <a href="protein-report.html" class="btn btn--ghost-light">View Protein Report</a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+  <div class="puff-ring" style="width:100%; height:100%; border-color: rgba(228,197,136,.14);"></div>
+  <div class="puff-ring" style="width:86%; height:86%; border-color: rgba(228,197,136,.20);"></div>
+  <div class="puff-ring" style="width:72%; height:72%; border-color: rgba(228,197,136,.28);"></div>
+
+  <!--
+    REAL PHOTO: drop your roti photo at assets/hero/roti.jpg (square,
+    ~800x800px+) and it will automatically replace the illustration
+    below. If that file isn't found, the hand-drawn SVG roti stays
+    as the fallback so the hero never breaks.
+  -->
+  <img class="roti-plate roti-photo" src="assets/hero/roti.png" alt="mTORA protein roti"
+       onerror="this.remove()">
+
+  <svg class="roti-plate" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="rotiBase" cx="38%" cy="32%" r="75%">
+        <stop offset="0%" stop-color="#F1D9A6"/>
+        <stop offset="45%" stop-color="#E3BE7E"/>
+        <stop offset="78%" stop-color="#C89257"/>
+        <stop offset="100%" stop-color="#A9713D"/>
+      </radialGradient>
+      <radialGradient id="rotiInner" cx="50%" cy="50%" r="50%">
+        <stop offset="60%" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#7A4E22" stop-opacity=".25"/>
+      </radialGradient>
+    </defs>
+    <circle cx="200" cy="200" r="188" fill="url(#rotiBase)"/>
+    <circle cx="200" cy="200" r="188" fill="url(#rotiInner)"/>
+    <g fill="#8A5A2B" opacity="0.35">
+      <circle cx="150" cy="120" r="4"/><circle cx="260" cy="150" r="3"/><circle cx="300" cy="240" r="4.5"/>
+      <circle cx="120" cy="260" r="3.5"/><circle cx="210" cy="290" r="3"/><circle cx="180" cy="200" r="2.5"/>
+      <circle cx="90" cy="180" r="3"/><circle cx="250" cy="90" r="2.5"/><circle cx="320" cy="180" r="3"/>
+    </g>
+    <ellipse cx="150" cy="130" rx="70" ry="40" fill="#ffffff" opacity="0.10"/>
+  </svg>
+  <div class="hero-scan">
+    LAB VERIFIED<br>
+    <b>15.0g</b> PROTEIN / ROTI<br>
+    NO PRESERVATIVES
+  </div>
+</div>
+  </div>
+  <div class="scroll-cue"><span>Scroll</span><span class="line"></span></div>
+</header>
+
+<!-- ================= ABOUT ================= -->
+<section class="section" id="about">
+  <div class="wrap about-grid">
+    <div class="about-visual reveal-scale">
+
+  <video autoplay muted loop playsinline preload="auto">
+    <source src="assets/about/about.mp4" type="video/mp4"></video>
+    <div class="about-tag">mTORA Kitchen · Everyday Roti</div>
+    </div>
+    <div class="about-copy">
+      <span class="eyebrow"><span class="why">About</span><span class="brand-name">mTORA</span></span>
+      <h2 class="reveal">More nutrition. Same everyday roti.</h2>
+      <p class="lede reveal">We believe protein shouldn't require a separate shake, a complicated recipe, or a major change to your everyday meals.</p>
+      <p class="reveal">mTORA was created to make protein a natural part of the food you already love starting with the humble Indian roti. We combine familiar everyday food with modern nutrition to create convenient, protein-rich food for everyday life.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BENEFITS ================= -->
+<section class="section section--cream2">
+  <div class="wrap">
+    <div class="benefits-head">
+      <span class="eyebrow">Why <span class="brand-name">mTORA</span></span>
+      <h2 class="reveal">More than just a roti.</h2>
+      <p class="lede reveal">Every mTORA Protein Roti is designed to bring more nutrition to your everyday meal.</p>
+    </div>
+
+    <div class="benefits-grid">
+      <div class="benefit-card benefit-card--feature reveal">
+        <span class="benefit-num">01</span>
+        <svg class="benefit-icon" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="10" stroke="currentColor" stroke-width="2" opacity=".5"/><circle cx="20" cy="20" r="3.5" fill="currentColor"/></svg>
+        <h3>15g protein</h3>
+        <p>15g of protein in every roti.</p>
+      </div>
+
+      <div class="benefit-card reveal">
+        <span class="benefit-num">02</span>
+        <svg class="benefit-icon" viewBox="0 0 40 40" fill="none"><path d="M8 30C8 18 18 8 30 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 22c6 0 10-4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".55"/></svg>
+        <h3>Good source of fiber</h3>
+        <p>Made to bring more fiber into your everyday meal.</p>
+      </div>
+
+      <div class="benefit-card reveal">
+        <span class="benefit-num">03</span>
+        <svg class="benefit-icon" viewBox="0 0 40 40" fill="none"><path d="M20 6l12 6v9c0 8-5.4 13.6-12 15-6.6-1.4-12-7-12-15v-9l12-6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14.5 20l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>No preservatives</h3>
+        <p>Made without added preservatives.</p>
+      </div>
+
+      <div class="benefit-card reveal">
+        <span class="benefit-num">04</span>
+        <svg class="benefit-icon" viewBox="0 0 40 40" fill="none"><path d="M20 5c4 4 4 8 0 12s-4 8 0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 5c4 4 4 8 0 12s-4 8 0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/><path d="M30 5c4 4 4 8 0 12s-4 8 0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/></svg>
+        <h3>Essential amino acids</h3>
+        <p>Designed with protein sources that provide essential amino acids.</p>
+      </div>
+
+      <div class="benefit-card reveal">
+        <span class="benefit-num">05</span>
+        <svg class="benefit-icon" viewBox="0 0 40 40" fill="none"><rect x="7" y="12" width="26" height="20" rx="4" stroke="currentColor" stroke-width="2"/><path d="M13 12V9a3 3 0 013-3h8a3 3 0 013 3v3" stroke="currentColor" stroke-width="2"/></svg>
+        <h3>Everyday nutrition</h3>
+        <p>An easy way to make protein part of your regular Indian meals.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MEAL FIT ================= -->
+<section class="section">
+  <div class="wrap">
+    <div class="mealfit-head">
+      <span class="eyebrow">How it fits</span>
+      <h2 class="reveal">Same meals. More protein.</h2>
+      <p class="lede reveal">Pair it with the meals you already love — mTORA isn't a replacement for real food, it's an easy protein upgrade to it.</p>
+    </div>
+
+    <div class="meal-row reveal">
+      <div class="meal-chip"><div class="swatch" style="--sw1:#2f4a2e; --sw2:#4d6b3f;"><img src="assets/meals/dal.png" alt="Dal" onerror="this.remove()"></div><span>Dal</span></div>
+      <div class="meal-chip"><div class="swatch" style="--sw1:#f0e2c0; --sw2:#e0c583;"><img src="assets/meals/paneer.png" alt="Paneer" onerror="this.remove()"></div><span>Paneer</span></div>
+      <div class="meal-chip"><div class="swatch" style="--sw1:#5a3620; --sw2:#8a5527;"><img src="assets/meals/sabzi.png" alt="Sabzi" onerror="this.remove()"></div><span>Sabzi</span></div>
+      <div class="meal-chip"><div class="swatch" style="--sw1:#f7f4ea; --sw2:#e5ddc4;"><img src="assets/meals/curd.png" alt="Curd" onerror="this.remove()"></div><span>Curd</span></div>
+      <div class="meal-chip"><div class="swatch" style="--sw1:#e8d9a8; --sw2:#d1a94f;"><img src="assets/meals/eggs.png" alt="Eggs" onerror="this.remove()"></div><span>Eggs</span></div>
+      <div class="meal-chip"><div class="swatch" style="--sw1:#7a3b22; --sw2:#a85a30;"><img src="assets/meals/chicken.png" alt="Chicken" onerror="this.remove()"></div><span>Chicken</span></div>
+      
+    </div>
+  </div>
+</section>
+
+<!-- ================= REELS ================= -->
+<section class="section section--navy" id="reels">
+  <div class="wrap">
+    <div class="reels-head">
+      <div>
+        <span class="eyebrow eyebrow--light">Social proof</span>
+        <h2 class="reveal">Real people. Real reactions.</h2>
+        <p class="lede reveal" style="color:rgba(244,232,218,.65); margin-top:10px;">See what people are saying about mTORA.</p>
+      </div>
+      <div class="reels-controls">
+        <button class="reel-arrow" id="reelPrev" aria-label="Previous reels">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="reel-arrow" id="reelNext" aria-label="Next reels">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!--
+      REEL SETUP:
+      Replace each .reel-card's contents with:
+        <video class="reel-media" muted loop playsinline preload="metadata"
+               poster="assets/reels/reel-1-poster.jpg">
+          <source src="assets/reels/reel-1.mp4" type="video/mp4">
+        </video>
+      Keep the reel-controls-mini / reel-meta markup as-is — the JS hooks into
+      [data-reel] automatically. Placeholder cards below show the layout.
+    -->
+    <div class="reel-track" id="reelTrack">
+  <div class="reel-card" data-reel tabindex="0" role="button" aria-label="Play reel">
+    <video class="reel-media" muted loop playsinline preload="metadata" poster="assets/reels/reel-1-poster.jpg">
+      <source src="assets/reels/reel-1.mp4" type="video/mp4">
+    </video>
+    <div class="reel-shade"></div>
+    <div class="reel-controls-mini">
+      <button class="reel-btn reel-mute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 9l4 6M20 9l-4 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="reel-meta"><div class="name">@customer_handle</div><div class="tag">Customer reel</div></div>
+  </div>
+
+  <div class="reel-card" data-reel tabindex="0" role="button" aria-label="Play reel">
+    <video class="reel-media" muted loop playsinline preload="metadata" poster="assets/reels/reel-2-poster.jpg">
+      <source src="assets/reels/reel-2.mp4" type="video/mp4">
+    </video>
+    <div class="reel-shade"></div>
+    <div class="reel-controls-mini">
+      <button class="reel-btn reel-mute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 9l4 6M20 9l-4 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="reel-meta"><div class="name">@customer_handle</div><div class="tag">Customer reel</div></div>
+  </div>
+
+  <div class="reel-card" data-reel tabindex="0" role="button" aria-label="Play reel">
+    <video class="reel-media" muted loop playsinline preload="metadata" poster="assets/reels/reel-3-poster.jpg">
+      <source src="assets/reels/reel-3.mp4" type="video/mp4">
+    </video>
+    <div class="reel-shade"></div>
+    <div class="reel-controls-mini">
+      <button class="reel-btn reel-mute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 9l4 6M20 9l-4 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="reel-meta"><div class="name">@customer_handle</div><div class="tag">Customer reel</div></div>
+  </div>
+
+  <div class="reel-card" data-reel tabindex="0" role="button" aria-label="Play reel">
+    <video class="reel-media" muted loop playsinline preload="metadata" poster="assets/reels/reel-4-poster.jpg">
+      <source src="assets/reels/reel-4.mp4" type="video/mp4">
+    </video>
+    <div class="reel-shade"></div>
+    <div class="reel-controls-mini">
+      <button class="reel-btn reel-mute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 9l4 6M20 9l-4 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="reel-meta"><div class="name">@customer_handle</div><div class="tag">Customer reel</div></div>
+  </div>
+
+  <div class="reel-card" data-reel tabindex="0" role="button" aria-label="Play reel">
+    <video class="reel-media" muted loop playsinline preload="metadata" poster="assets/reels/reel-5-poster.jpg">
+      <source src="assets/reels/reel-5.mp4" type="video/mp4">
+    </video>
+    <div class="reel-shade"></div>
+    <div class="reel-controls-mini">
+      <button class="reel-btn reel-mute" aria-label="Mute"><svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 9l4 6M20 9l-4 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="reel-meta"><div class="name">@customer_handle</div><div class="tag">Customer reel</div></div>
+  </div>
+
+  <div class="reel-card" data-reel tabindex="0" role="button" aria-label="Play reel">
+    <video class="reel-media" muted loop playsinline preload="metadata" poster="assets/reels/reel-6-poster.jpg">
+      <source src="assets/reels/reel-6.mp4" type="video/mp4">
+    </video>
+    <div class="reel-shade"></div>
+    <div class="reel-controls-mini">
+
+    <div class="reel-dots" id="reelDots"></div>
+
+    
+  </div>
+</section>
+
+<!-- Reel modal -->
+<div class="reel-modal" id="reelModal" aria-hidden="true">
+  <div class="reel-modal-inner" id="reelModalInner">
+    <button class="reel-modal-nav prev" id="reelModalPrev" aria-label="Previous">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="reel-modal-nav next" id="reelModalNext" aria-label="Next">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="reel-modal-close" id="reelModalClose" aria-label="Close">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="reel-controls-mini" style="top:14px; left:14px; right:auto;">
+      <button class="reel-btn" id="reelModalPlay" aria-label="Play/Pause">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="reel-controls-mini">
+      <button class="reel-btn" id="reelModalMute" aria-label="Mute/Unmute">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 9l4 6M20 9l-4 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FINAL CTA ================= -->
+<section class="section final-cta">
+  <div class="wrap inner">
+    <span class="eyebrow eyebrow--light"><span class="brand-name">mTORA</span></span>
+    <h2 class="reveal">Make protein part of your everyday meal.</h2>
+    <p class="lede reveal">Your everyday roti. Upgraded with protein.</p>
+    <div class="ctas">
+      <a href="protein-report.html" class="btn btn--on-navy">View Protein Report</a>
+      <a href="https://www.instagram.com/mtora.in?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="btn btn--ghost-light">Follow us on Instagram</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <a href="index" class="logo">mTORA</a>
+      <ul class="footer-links">
+        <li><a href="index">Home</a></li>
+        <li><a href="protein-report">Protein Report</a></li>
+        <li><a href="https://www.instagram.com/mtora.in?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Instagram</a></li>
+        <li><a href="https://www.instagram.com/mtora.in?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-bottom">© mTORA. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+// ===================== mTORA — site interactions =====================
+document.addEventListener('DOMContentLoaded', function () {
+
+  /* ---------- Promo bar ---------- */
+  var promoBar = document.getElementById('promoBar');
+  var promoClose = document.getElementById('promoClose');
+  if (promoBar) {
+    function setPromoOffset () {
+      var h = promoBar.classList.contains('is-hidden') ? 0 : promoBar.offsetHeight;
+      document.documentElement.style.setProperty('--promo-offset', h + 'px');
+    }
+    setPromoOffset();
+    window.addEventListener('resize', setPromoOffset);
+
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > 30) {
+        promoBar.classList.add('is-hidden');
+      } else if (!promoBar.dataset.dismissed) {
+        promoBar.classList.remove('is-hidden');
+      }
+      setPromoOffset();
+    }, { passive: true });
+
+    if (promoClose) {
+      promoClose.addEventListener('click', function () {
+        promoBar.dataset.dismissed = 'true';
+        promoBar.classList.add('is-hidden');
+        setPromoOffset();
+      });
+    }
+  }
+
+  /* ---------- Sticky nav ---------- */
+  var nav = document.getElementById('siteNav');
+  function onScroll () {
+    if (!nav) return;
+    if (window.scrollY > 40) nav.classList.add('is-scrolled');
+    else nav.classList.remove('is-scrolled');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- Mobile menu ---------- */
+  var burger = document.getElementById('burgerBtn');
+  var mobileMenu = document.getElementById('mobileMenu');
+  if (burger && mobileMenu) {
+    burger.addEventListener('click', function () {
+      var isOpen = mobileMenu.classList.toggle('is-open');
+      burger.classList.toggle('is-open', isOpen);
+      burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+    mobileMenu.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        mobileMenu.classList.remove('is-open');
+        burger.classList.remove('is-open');
+        document.body.style.overflow = '';
+      });
+    });
+  }
+
+  /* ---------- Scroll reveal ---------- */
+  var revealEls = document.querySelectorAll('.reveal, .reveal-scale');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(function (el) { io.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
+  /* ---------- Reel carousel ---------- */
+  var track = document.getElementById('reelTrack');
+  if (track) {
+    var cards = Array.prototype.slice.call(track.querySelectorAll('.reel-card'));
+    var dotsWrap = document.getElementById('reelDots');
+    var prevBtn = document.getElementById('reelPrev');
+    var nextBtn = document.getElementById('reelNext');
+
+    // Build pagination dots
+    cards.forEach(function (_, i) {
+      var dot = document.createElement('button');
+      dot.setAttribute('aria-label', 'Go to reel ' + (i + 1));
+      if (i === 0) dot.classList.add('active');
+      dot.addEventListener('click', function () { scrollToCard(i); });
+      dotsWrap.appendChild(dot);
+    });
+    var dots = Array.prototype.slice.call(dotsWrap.children);
+
+    function cardStep () {
+      var card = cards[0];
+      var style = window.getComputedStyle(track);
+      var gap = parseFloat(style.columnGap || style.gap || 20);
+      return card.getBoundingClientRect().width + gap;
+    }
+
+    function scrollToCard (i) {
+      track.scrollTo({ left: i * cardStep(), behavior: 'smooth' });
+    }
+
+    function updateActiveDot () {
+      var idx = Math.round(track.scrollLeft / cardStep());
+      dots.forEach(function (d, i) { d.classList.toggle('active', i === idx); });
+      if (prevBtn) prevBtn.disabled = idx <= 0;
+      if (nextBtn) nextBtn.disabled = idx >= cards.length - 1;
+    }
+
+    track.addEventListener('scroll', function () {
+      window.requestAnimationFrame(updateActiveDot);
+    }, { passive: true });
+
+    if (prevBtn) prevBtn.addEventListener('click', function () {
+      var idx = Math.round(track.scrollLeft / cardStep());
+      scrollToCard(Math.max(0, idx - 1));
+    });
+    if (nextBtn) nextBtn.addEventListener('click', function () {
+      var idx = Math.round(track.scrollLeft / cardStep());
+      scrollToCard(Math.min(cards.length - 1, idx + 1));
+    });
+
+    updateActiveDot();
+
+    // Autoplay muted preview when a card's video is in view (if a <video> exists)
+    cards.forEach(function (card) {
+      var video = card.querySelector('video.reel-media');
+      if (!video) return;
+      var cardIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) video.play().catch(function () {});
+          else video.pause();
+        });
+      }, { threshold: 0.6 });
+      cardIO.observe(card);
+
+      var muteBtn = card.querySelector('.reel-mute');
+      if (muteBtn) {
+        muteBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          video.muted = !video.muted;
+        });
+      }
+    });
+
+    /* ---------- Reel modal (lightbox) ---------- */
+    var modal = document.getElementById('reelModal');
+    var modalInner = document.getElementById('reelModalInner');
+    var modalClose = document.getElementById('reelModalClose');
+    var modalPrev = document.getElementById('reelModalPrev');
+    var modalNext = document.getElementById('reelModalNext');
+    var modalPlay = document.getElementById('reelModalPlay');
+    var modalMute = document.getElementById('reelModalMute');
+    var currentIndex = 0;
+
+    function renderModal (index) {
+      currentIndex = (index + cards.length) % cards.length;
+      var sourceCard = cards[currentIndex];
+      var sourceVideo = sourceCard.querySelector('video.reel-media');
+      // Clear previous media (keep control buttons which are appended after)
+      var oldMedia = modalInner.querySelector('.reel-media, .reel-poster');
+      if (oldMedia) oldMedia.remove();
+
+      if (sourceVideo) {
+        var v = document.createElement('video');
+        v.className = 'reel-media';
+        v.src = sourceVideo.currentSrc || sourceVideo.src;
+        v.setAttribute('playsinline', '');
+        v.loop = true;
+        v.muted = false;
+        v.controls = false;
+        modalInner.insertBefore(v, modalInner.firstChild);
+        v.play().catch(function () {});
+        modalMute.querySelector('svg').style.opacity = v.muted ? '.5' : '1';
+      } else {
+        var poster = document.createElement('div');
+        poster.className = 'reel-poster';
+        poster.innerHTML = sourceCard.querySelector('.reel-poster').innerHTML;
+        modalInner.insertBefore(poster, modalInner.firstChild);
+      }
+    }
+
+    function openModal (index) {
+      renderModal(index);
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal () {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      var v = modalInner.querySelector('video');
+      if (v) v.pause();
+    }
+
+    cards.forEach(function (card, i) {
+      card.addEventListener('click', function () { openModal(i); });
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(i); }
+      });
+    });
+
+    if (modalClose) modalClose.addEventListener('click', closeModal);
+    if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function (e) {
+      if (!modal.classList.contains('is-open')) return;
+      if (e.key === 'Escape') closeModal();
+      if (e.key === 'ArrowRight') renderModal(currentIndex + 1);
+      if (e.key === 'ArrowLeft') renderModal(currentIndex - 1);
+    });
+    if (modalPrev) modalPrev.addEventListener('click', function () { renderModal(currentIndex - 1); });
+    if (modalNext) modalNext.addEventListener('click', function () { renderModal(currentIndex + 1); });
+    if (modalPlay) modalPlay.addEventListener('click', function () {
+      var v = modalInner.querySelector('video');
+      if (!v) return;
+      if (v.paused) v.play(); else v.pause();
+    });
+    if (modalMute) modalMute.addEventListener('click', function () {
+      var v = modalInner.querySelector('video');
+      if (!v) return;
+      v.muted = !v.muted;
+    });
+  }
+});
+
+</script>
+</body>
+</html>

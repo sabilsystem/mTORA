@@ -1,0 +1,61 @@
+Plan-mTORA
+
+1- First step is to connect backend and frontend
+
+2- implement the requirements such as maps for customer, login page [with Number], payment gate
+
+3- Update UI [Refer to "New Features implementation" doc]
+
+---------------------------------------
+
+/Login-page
+
+- this should not be the first page, only be called after user presses order button, 
+
+- on top right corner beside [Order now] there should be [Login] or a login emoji which when clicked comes to this page 
+
+- work of this page is to get user data and retain it for future use 
+
+- user is going to login using his number
+
+- the number is verified via OTP 
+
+- the number should be then saved for future (when the user comes and clicks login, if same device, dont ask for login and if new device detected then ask for number, 
+if same number found then send otp and login
+
+- First time users need to enter the following details 
++ Name
++ Number ; Verified by OTP
++ Address; saved through the device current location/ manual entry [A pop up for asking permission to take the loc, if denied -> manual entry 
++ WhatsApp number ["same as mobile number" should be an option below
+
+
+
+
+-----------------------
+/order page
+
+- One big image of roti or the pack or something mix from Gemini image
+
+- quantity adding
+
+- Slot booking Today 7-9 pm, Tomorrow 7-9 am, Tomorrow 7-9 pm
+
+- place order
+
+- then place order should take you to the next page where you save your details 
+
+- after saving details or if the details are already stored ( this will be determined if the user has used this mobile number for the first time)
+
+-after saving the address details, it should go back to the /order page and then place the order should take you to payment page and the payment should ask two options COD/UPI COD will give +15 rupees, and delivery charges 
+
+- finally after the order is placed, Order is confirmed ✅ should be displayed and "for more enquiries contact us on Instagram and WhatsApp"
+
+///backend's task 
+- save the Users details as permanent with ID as the number
+
+- after the payment is processed, save the payment ID,date, 
+
+- unique order ID[generated] connected with payment id, and User number
+
+- 
