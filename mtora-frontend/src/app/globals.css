@@ -7,30 +7,144 @@
    ========================================================================== */
 
 :root {
-  --navy: #363A2D;
-  --navy-2: #454A38;
-  --navy-3: #5B6249;
-  --cream: #F4E8DA;
-  --cream-2: #EADFC8;
-  --paper: #FAF3E7;
-  --charcoal: #221E1A;
-  --charcoal-soft: #4A443C;
-  --wheat: #C79A4B;
-  --wheat-light: #E4C588;
-  --wheat-dim: #8a6f3c;
-  --line: rgba(34, 30, 26, 0.12);
+  /* ==========================================================================
+     MTORA V2 Canonical Design Tokens (Section 4 of Design System Spec)
+     ========================================================================== */
+
+  /* 4.1 Typography Families */
+  --font-family-display: var(--font-display), "Space Grotesk", -apple-system, sans-serif;
+  --font-family-body: var(--font-body), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-mono: var(--font-mono), "Space Mono", "Courier New", monospace;
+
+  /* Typography Font Sizes & Line Heights */
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+  --text-5xl: 3rem;       /* 48px */
+
+  --leading-none: 1;
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* 4.2 Color Palette */
+  /* Brand Primaries */
+  --color-brand-primary: #363A2D;       /* Deep Olive Charcoal */
+  --color-brand-secondary: #454A38;     /* Muted Olive */
+  --color-brand-tertiary: #5B6249;      /* Forest Accent */
+
+  /* Warm Neutrals / Surfaces */
+  --color-surface-bg: #F4E8DA;          /* Warm Cream Background */
+  --color-surface-card: #FAF3E7;        /* Crisp Paper Card Surface */
+  --color-surface-muted: #EADFC8;       /* Subtle Cream Hover/Active */
+  --color-surface-border: rgba(34, 30, 26, 0.12); /* Subtle Border */
+  --color-surface-border-strong: rgba(34, 30, 26, 0.24);
+
+  /* Brand Accents */
+  --color-accent-wheat: #C79A4B;        /* Golden Wheat Primary CTA */
+  --color-accent-wheat-light: #E4C588;  /* Light Wheat Hover */
+  --color-accent-wheat-dim: #8A6F3C;    /* Muted Wheat Focus */
+
+  /* Text Colors */
+  --color-text-primary: #221E1A;        /* Dark Charcoal */
+  --color-text-secondary: #4A443C;      /* Soft Charcoal */
+  --color-text-muted: #7E7569;          /* Placeholder / Meta */
+  --color-text-inverse: #FAF3E7;        /* Cream Text on Dark */
+
+  /* Semantic Feedback */
+  --color-semantic-success: #2E7D32;    /* Confirmation Green */
+  --color-semantic-success-bg: #E8F5E9;
+  --color-semantic-warning: #ED6C02;    /* Cutoff Warning Amber */
+  --color-semantic-warning-bg: #FFF4E5;
+  --color-semantic-error: #D32F2F;      /* Payment / Input Error Red */
+  --color-semantic-error-bg: #FFEBEE;
+
+  /* 4.3 Spacing Scale (4px baseline grid) */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Layout Containers */
+  --container-width: 1240px;
+  --container-checkout: 960px;
+  --container-narrow: 720px;
+  --container-padding: clamp(16px, 4vw, 32px);
+
+  /* 4.4 Radii & Shadows */
+  --radius-none: 0px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 9999px;
+
+  /* Elevations (Shadows) */
+  --shadow-sm: 0 2px 4px rgba(34, 30, 26, 0.05);
+  --shadow-md: 0 6px 16px rgba(34, 30, 26, 0.08);
+  --shadow-lg: 0 12px 32px rgba(34, 30, 26, 0.12);
+  --shadow-sticky-bar: 0 -4px 20px rgba(34, 30, 26, 0.10);
+  --shadow-focus: 0 0 0 3px rgba(199, 154, 75, 0.35);
+
+  /* 4.5 Motion & Transitions */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+
+  /* 4.6 Breakpoints Reference */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  /* Z-Index Hierarchy */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-fixed: 200;
+  --z-whatsapp: 700;
+  --z-modal-backdrop: 800;
+  --z-modal: 900;
+  --z-toast: 1000;
+
+  /* ==========================================================================
+     Backward Compatibility Aliases (for existing components)
+     ========================================================================== */
+  --navy: var(--color-brand-primary);
+  --navy-2: var(--color-brand-secondary);
+  --navy-3: var(--color-brand-tertiary);
+  --cream: var(--color-surface-bg);
+  --cream-2: var(--color-surface-muted);
+  --paper: var(--color-surface-card);
+  --charcoal: var(--color-text-primary);
+  --charcoal-soft: var(--color-text-secondary);
+  --wheat: var(--color-accent-wheat);
+  --wheat-light: var(--color-accent-wheat-light);
+  --wheat-dim: var(--color-accent-wheat-dim);
+  --line: var(--color-surface-border);
   --line-dark: rgba(244, 232, 218, 0.14);
-
-  --display: var(--font-display), "Space Grotesk", "Arial Narrow", sans-serif;
-  --body: var(--font-body), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --mono: var(--font-mono), "Space Mono", "Courier New", monospace;
-
-  --container: 1240px;
-  --radius-lg: 32px;
-  --radius-md: 20px;
-  --radius-sm: 12px;
-
-  --ease: cubic-bezier(.22, .61, .36, 1);
+  --display: var(--font-family-display);
+  --body: var(--font-family-body);
+  --mono: var(--font-family-mono);
+  --container: var(--container-width);
+  --ease: var(--ease-standard);
   --promo-offset: 0px;
 }
 
@@ -127,9 +241,10 @@ h3,
 h4 {
   font-family: var(--display);
   font-weight: 700;
-  line-height: 1.02;
+  line-height: 1.05;
   margin: 0;
   letter-spacing: -0.01em;
+  overflow-wrap: break-word;
 }
 
 .eyebrow {
@@ -1788,5 +1903,74 @@ p {
 @media (max-width: 560px) {
   .form-row {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   MTORA V2 Shared Layout Primitives & Responsive Breakpoint Utilities
+   ========================================================================== */
+
+/* Responsive Container Utilities */
+.ds-container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+.ds-container--checkout {
+  width: 100%;
+  max-width: var(--container-checkout);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+.ds-container--narrow {
+  width: 100%;
+  max-width: var(--container-narrow);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+.ds-container--full {
+  width: 100%;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+/* Breakpoint-driven visibility classes */
+@media (max-width: 639px) {
+  .ds-hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ds-hide-tablet {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ds-hide-desktop {
+    display: none !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .ds-show-mobile-only {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ds-show-desktop-only {
+    display: none !important;
   }
 }

@@ -1,0 +1,72 @@
+/* Badge component styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  font-family: var(--font-family-mono);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: var(--radius-pill);
+  line-height: var(--leading-none);
+  white-space: nowrap;
+  user-select: none;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+/* Sizes */
+.sm {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.md {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* Variants */
+.wheat {
+  background-color: var(--color-accent-wheat);
+  color: var(--color-brand-primary);
+  border-color: rgba(138, 111, 60, 0.2);
+}
+
+.success {
+  background-color: var(--color-semantic-success-bg);
+  color: var(--color-semantic-success);
+  border-color: rgba(46, 125, 50, 0.2);
+}
+
+.warning {
+  background-color: var(--color-semantic-warning-bg);
+  color: var(--color-semantic-warning);
+  border-color: rgba(237, 108, 2, 0.2);
+}
+
+.error {
+  background-color: var(--color-semantic-error-bg);
+  color: var(--color-semantic-error);
+  border-color: rgba(211, 47, 47, 0.2);
+}
+
+.neutral {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  border-color: var(--color-surface-border);
+}
+
+.dark {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  border-color: rgba(244, 232, 218, 0.15);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

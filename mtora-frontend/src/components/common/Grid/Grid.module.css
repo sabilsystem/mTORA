@@ -1,0 +1,52 @@
+/* Grid layout primitive */
+.grid {
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Default single column fallback */
+.cols1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.cols2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cols4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.cols5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.cols6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.cols12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+
+/* Mobile default columns (< 640px) */
+.smCols1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.smCols2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.smCols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* Tablet columns (640px - 1024px) */
+@media (min-width: 640px) {
+  .mdCols1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .mdCols2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mdCols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mdCols4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Desktop columns (> 1024px) */
+@media (min-width: 1024px) {
+  .lgCols1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .lgCols2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lgCols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lgCols4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lgCols5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .lgCols6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .lgCols12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+}
+
+/* Gaps */
+.gap0 { gap: var(--space-0); }
+.gap1 { gap: var(--space-1); }
+.gap2 { gap: var(--space-2); }
+.gap3 { gap: var(--space-3); }
+.gap4 { gap: var(--space-4); }
+.gap5 { gap: var(--space-5); }
+.gap6 { gap: var(--space-6); }
+.gap8 { gap: var(--space-8); }
+.gap10 { gap: var(--space-10); }
+.gap12 { gap: var(--space-12); }
+.gap16 { gap: var(--space-16); }

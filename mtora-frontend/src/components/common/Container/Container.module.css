@@ -1,0 +1,34 @@
+/* Container layout primitive */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+.padNormal {
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+.padNone {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Width variants */
+.default {
+  max-width: var(--container-width);
+}
+
+.checkout {
+  max-width: var(--container-checkout);
+}
+
+.narrow {
+  max-width: var(--container-narrow);
+}
+
+.full {
+  max-width: 100%;
+}

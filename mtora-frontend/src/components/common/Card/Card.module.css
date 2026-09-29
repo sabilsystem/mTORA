@@ -1,0 +1,126 @@
+/* Card component styles */
+.card {
+  box-sizing: border-box;
+  position: relative;
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+/* Surface Variants */
+.default {
+  background-color: var(--color-surface-card);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-surface-border);
+}
+
+.muted {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-surface-border);
+}
+
+.dark {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  border: 1px solid rgba(244, 232, 218, 0.12);
+}
+
+.outline {
+  background-color: transparent;
+  color: var(--color-text-primary);
+  border: 1.5px solid var(--color-surface-border-strong);
+}
+
+/* Padding variants */
+.pNone {
+  padding: 0;
+}
+
+.pSm {
+  padding: var(--space-3); /* 12px */
+}
+
+.pMd {
+  padding: var(--space-5); /* 20px */
+}
+
+.pLg {
+  padding: var(--space-8); /* 32px */
+}
+
+/* Radius variants */
+.rNone {
+  border-radius: var(--radius-none);
+}
+
+.rSm {
+  border-radius: var(--radius-sm);
+}
+
+.rMd {
+  border-radius: var(--radius-md);
+}
+
+.rLg {
+  border-radius: var(--radius-lg);
+}
+
+/* Elevation (Shadows) */
+.elevNone {
+  box-shadow: none;
+}
+
+.elevSm {
+  box-shadow: var(--shadow-sm);
+}
+
+.elevMd {
+  box-shadow: var(--shadow-md);
+}
+
+.elevLg {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Interactive & Selectable states */
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.interactive:active {
+  transform: translateY(0);
+}
+
+.selectable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.selectable:hover:not(.isSelected) {
+  border-color: var(--color-accent-wheat-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.isSelected {
+  border-color: var(--color-accent-wheat) !important;
+  box-shadow: 0 0 0 2px var(--color-accent-wheat), var(--shadow-md) !important;
+}
+
+.card:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+    transform: none !important;
+  }
+}
